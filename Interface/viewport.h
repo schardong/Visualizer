@@ -17,6 +17,7 @@ namespace Ui
         Renderer* scene;
 
         glm::vec2 mousePressLoc;
+        glm::vec2 rotAxis;
         float rotSpeed;
 
     public:
@@ -33,6 +34,7 @@ namespace Ui
 
         void mousePressEvent(QMouseEvent *);
         void mouseReleaseEvent(QMouseEvent *);
+        void wheelEvent(QWheelEvent *);
 
     public slots:
         void timerUpdate();

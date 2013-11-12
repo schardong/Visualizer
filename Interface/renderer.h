@@ -50,6 +50,7 @@ public:
     void render();
     void resize(int, int);
     void rotateCamera(glm::vec2, float);
+    void moveCamera(float);
     void loadVolume(std::string);
     void loadTransferFunction(std::string);
 };

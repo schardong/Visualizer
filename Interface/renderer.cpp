@@ -162,6 +162,11 @@ void Renderer::rotateCamera(glm::vec2 axis, float speed)
     viewMatrix = glm::rotate(viewMatrix, speed, glm::vec3(axis, 0.f));
 }
 
+void Renderer::moveCamera(float distance)
+{
+    cout << "Renderer::moveCamera -> NOT IMPLEMENTED" << endl;
+}
+
 void Renderer::loadUniforms(Renderer::SHADER_PASS p)
 {
     Shader* s;
