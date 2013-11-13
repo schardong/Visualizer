@@ -1,8 +1,7 @@
 #ifndef VIEWPORT_H
 #define VIEWPORT_H
 
-#include "GL3/gl3w.h"
-#include "scene.h"
+#include "viskernel.h"
 #include "renderer.h"
 #include <QGLWidget>
 
@@ -26,6 +25,8 @@ namespace Ui
 
         void loadVolume(std::string);
         void loadTransferFuncion(std::string);
+        void setNumSamples(float);
+        float getNumSamples();
 
     protected:
         void initializeGL();

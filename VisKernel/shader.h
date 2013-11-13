@@ -2,6 +2,7 @@
 #define SHADER_H
 
 #include "GL3/gl3w.h"
+
 #include <string>
 #include <glm/glm.hpp>
 

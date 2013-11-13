@@ -12,27 +12,16 @@ TARGET = Interface
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
+SOURCES += \
     viewport.cpp \
-    gl3w.c \
     renderer.cpp \
-    volumedata.cpp \
-    shader.cpp \
-    resources.cpp \
-    resourcemanager.cpp \
-    eventmanager.cpp
+    mainwindow.cpp \
+    main.cpp
 
-HEADERS  += mainwindow.h \
+HEADERS  += \
     viewport.h \
-    scene.h \
     renderer.h \
-    volumedata.h \
-    singleton.h \
-    shader.h \
-    resources.h \
-    resourcemanager.h \
-    eventmanager.h
+    mainwindow.h
 
 OTHER_FILES += \
     secondPass.vert \
@@ -40,9 +29,8 @@ OTHER_FILES += \
     firstPass.vert \
     firstPass.frag
 
-FORMS    +=
-
-INCLUDEPATH += include
+INCLUDEPATH += ../include
+INCLUDEPATH += ../VisKernel
 
 config.path = $$OUT_PWD/
 config.files = $$OTHER_FILES
@@ -50,3 +38,5 @@ config.files = $$OTHER_FILES
 INSTALLS += config
 
 LIBS += -ldl
+
+LIBS += -L$$OUT_PWD/../VisKernel -lVisKernel

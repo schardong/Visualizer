@@ -1,9 +1,10 @@
 #ifndef VOLUMEDATA_H
 #define VOLUMEDATA_H
 
+#include "resources.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
-#include "resources.h"
 
 class VolumeData
 {

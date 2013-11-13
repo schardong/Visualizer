@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "viewport.h"
+
 #include <QMenu>
 #include <QAction>
 #include <QMenuBar>
@@ -8,61 +9,84 @@
 namespace Ui
 {
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent)
-{
-    loadVolAction = new QAction("Load Volume Data", this);
-    connect(loadVolAction, SIGNAL(triggered()), this, SLOT(loadVolume()));
+    const float MainWindow::STEP = 8;
 
-    loadTFAction = new QAction("Load Transfer Function", this);
-    connect(loadTFAction, SIGNAL(triggered()), this, SLOT(loadTransferFunction()));
+    MainWindow::MainWindow(QWidget *parent) :
+        QMainWindow(parent)
+    {
+        loadVolAction = new QAction("Load Volume Data", this);
+        connect(loadVolAction, SIGNAL(triggered()), this, SLOT(loadVolume()));
 
-    quitAction = new QAction("Quit", this);
-    connect(quitAction, SIGNAL(triggered()), this, SLOT(quit()));
+        loadTFAction = new QAction("Load Transfer Function", this);
+        connect(loadTFAction, SIGNAL(triggered()), this, SLOT(loadTransferFunction()));
 
-    fileMenu = new QMenu("File", this);
-    fileMenu->addAction(loadVolAction);
-    fileMenu->addAction(loadTFAction);
-    fileMenu->addSeparator();
-    fileMenu->addAction(quitAction);
+        quitAction = new QAction("Quit", this);
+        connect(quitAction, SIGNAL(triggered()), this, SLOT(quit()));
 
-    menuBar()->addMenu(fileMenu);
+        incSamplesAction = new QAction("Increase Sampling", this);
+        connect(incSamplesAction, SIGNAL(triggered()), this, SLOT(increaseSamples()));
 
-    resize(800, 600);
+        decSamplesAction = new QAction("Decrease Sampling", this);
+        connect(decSamplesAction, SIGNAL(triggered()), this, SLOT(decreaseSamples()));
 
-    QGLFormat f;
-    f.setVersion(3, 3);
-    f.setProfile(QGLFormat::CoreProfile);
+        fileMenu = new QMenu("File", this);
+        fileMenu->addAction(loadVolAction);
+        fileMenu->addAction(loadTFAction);
+        fileMenu->addSeparator();
+        fileMenu->addAction(quitAction);
 
-    view = new Ui::Viewport(f, this);
-    setCentralWidget(view);
-}
+        editMenu = new QMenu("Edit", this);
+        editMenu->addAction(incSamplesAction);
+        editMenu->addAction(decSamplesAction);
 
-MainWindow::~MainWindow()
-{
-    delete view;
-}
+        menuBar()->addMenu(fileMenu);
+        menuBar()->addMenu(editMenu);
 
-void MainWindow::loadVolume()
-{
-    QString path = QFileDialog::getOpenFileName(this, "Load Volume", QDir::home().absolutePath());
-    if(!path.isEmpty()) {
-        view->loadVolume(path.toStdString());
+        resize(800, 600);
+
+        QGLFormat f;
+        f.setVersion(3, 3);
+        f.setProfile(QGLFormat::CoreProfile);
+
+        view = new Ui::Viewport(f, this);
+        setCentralWidget(view);
     }
 
-}
-
-void MainWindow::loadTransferFunction()
-{
-    QString path = QFileDialog::getOpenFileName(this, "Load Transfer Function", QDir::home().absolutePath());
-    if(!path.isEmpty()) {
-        view->loadTransferFuncion(path.toStdString());
+    MainWindow::~MainWindow()
+    {
+        delete view;
     }
-}
 
-void MainWindow::quit()
-{
-    close();
-}
+    void MainWindow::loadVolume()
+    {
+        QString path = QFileDialog::getOpenFileName(this, "Load Volume", QDir::home().absolutePath());
+        if(!path.isEmpty()) {
+            view->loadVolume(path.toStdString());
+        }
+
+    }
+
+    void MainWindow::loadTransferFunction()
+    {
+        QString path = QFileDialog::getOpenFileName(this, "Load Transfer Function", QDir::home().absolutePath());
+        if(!path.isEmpty()) {
+            view->loadTransferFuncion(path.toStdString());
+        }
+    }
+
+    void MainWindow::quit()
+    {
+        close();
+    }
+
+    void MainWindow::increaseSamples()
+    {
+        view->setNumSamples(view->getNumSamples() + STEP);
+    }
+
+    void MainWindow::decreaseSamples()
+    {
+        view->setNumSamples(view->getNumSamples() - STEP);
+    }
 
 }

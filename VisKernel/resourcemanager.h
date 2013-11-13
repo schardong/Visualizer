@@ -1,8 +1,8 @@
 #ifndef RESOURCEMANAGER_H
 #define RESOURCEMANAGER_H
 
-#include <string>
 #include "singleton.h"
+#include <string>
 
 class ResourceManager : public Singleton<ResourceManager>
 {

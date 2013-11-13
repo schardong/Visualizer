@@ -1,12 +1,7 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include "GL3/gl3w.h"
-#include "scene.h"
-#include "shader.h"
-#include "volumedata.h"
-
-#include <glm/glm.hpp>
+#include "viskernel.h"
 
 class Renderer : public Scene
 {
@@ -38,8 +33,6 @@ private:
     void loadUniforms(Renderer::SHADER_PASS);
     void checkUniforms(Renderer::SHADER_PASS);
 
-    float r;
-
 public:
     Renderer(int w, int h);
     virtual ~Renderer();
@@ -53,6 +46,8 @@ public:
     void moveCamera(float);
     void loadVolume(std::string);
     void loadTransferFunction(std::string);
+    void setNumSamples(float);
+    float getNumSamples();
 };
 
 #endif // RENDERER_H

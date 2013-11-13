@@ -5,6 +5,9 @@
 
 #include <QTimer>
 #include <QKeyEvent>
+#include <QVector2D>
+#include <QMouseEvent>
+#include <QWheelEvent>
 #include <iostream>
 
 using std::cout;
@@ -46,6 +49,16 @@ void Viewport::loadTransferFuncion(std::string path)
     timer->start(16);
 }
 
+void Viewport::setNumSamples(float n)
+{
+    scene->setNumSamples(n);
+}
+
+float Viewport::getNumSamples()
+{
+    return scene->getNumSamples();
+}
+
 void Viewport::initializeGL()
 {
     makeCurrent();
@@ -84,13 +97,13 @@ void Viewport::resizeGL(int w, int h)
 
 void Viewport::mousePressEvent(QMouseEvent* e)
 {
-    QVector2D tmpMouseLoc = QVector2D(e->localPos());
+    QVector2D tmpMouseLoc = QVector2D(e->pos());
     mousePressLoc = glm::vec2(tmpMouseLoc.x(), tmpMouseLoc.y());
 }
 
 void Viewport::mouseReleaseEvent(QMouseEvent* e)
 {
-    QVector2D tmpMouseLoc = QVector2D(e->localPos());
+    QVector2D tmpMouseLoc = QVector2D(e->pos());
     glm::vec2 mouseReleaseLoc = glm::vec2(tmpMouseLoc.x(), tmpMouseLoc.y());
 
     glm::vec2 mouseDiff = mouseReleaseLoc - mousePressLoc;

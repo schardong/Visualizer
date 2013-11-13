@@ -23,9 +23,6 @@ Renderer::Renderer(int w, int h)
     fovy = 45;
     numSamples = 256.f;
     vd = new VolumeData();
-
-//    loadVolume("/home/guilherme/Pictures/datasets/stent.512x512x174.uint16");
-//    loadTransferFunction("/home/guilherme/Pictures/datasets/tff_bone.uint16");
 }
 
 Renderer::~Renderer()
@@ -107,12 +104,10 @@ void Renderer::init()
     fPass = new Shader("firstPass.vert", "firstPass.frag");
     fPass->bind();
     loadUniforms(FIRST);
-//    checkUniforms(FIRST);
 
     sPass = new Shader("secondPass.vert", "secondPass.frag");
     sPass->bind();
     loadUniforms(SECOND);
-//    checkUniforms(SECOND);
 
     Shader::unbind();
 }
@@ -335,4 +330,15 @@ void Renderer::loadTransferFunction(std::string path)
     loadUniforms(SECOND);
 
     Shader::unbind();
+}
+
+void Renderer::setNumSamples(float n)
+{
+    if(n > 0.f)
+        numSamples = n;
+}
+
+float Renderer::getNumSamples()
+{
+    return numSamples;
 }

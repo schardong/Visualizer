@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "GL3/gl3w.h"
+#include "viskernel.h"
 #include "viewport.h"
 
 #include <QMainWindow>
@@ -24,14 +24,23 @@ private slots:
     void loadTransferFunction();
     void quit();
 
+    void increaseSamples();
+    void decreaseSamples();
+
 private:
     Ui::Viewport* view;
 
     QAction* loadVolAction;
     QAction* loadTFAction;
     QAction* quitAction;
+    QAction* incSamplesAction;
+    QAction* decSamplesAction;
 
     QMenu* fileMenu;
+    QMenu* editMenu;
+
+
+    static const float STEP;
 };
 
 }

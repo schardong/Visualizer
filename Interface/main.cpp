@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include <QApplication>
-#include <QGLFormat>
 
 int main(int argc, char *argv[])
 {

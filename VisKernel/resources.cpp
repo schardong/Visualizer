@@ -1,8 +1,8 @@
-#include <fstream>
-#include <iostream>
-
 #include "resources.h"
 #include "resourcemanager.h"
+
+#include <fstream>
+#include <iostream>
 
 GLuint load3dTex(std::string filename, int w, int h, int slices, size_t bytes_per_pixel)
 {
