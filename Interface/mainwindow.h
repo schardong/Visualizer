@@ -9,39 +9,39 @@
 namespace Ui
 {
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
+    class MainWindow : public QMainWindow
+    {
+        Q_OBJECT
 
-public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    public:
+        explicit MainWindow(QWidget *parent = 0);
+        ~MainWindow();
 
-    void setViewport(Ui::Viewport*);
+        void setViewport(Ui::Viewport*);
 
-private slots:
-    void loadVolume();
-    void loadTransferFunction();
-    void quit();
+    private slots:
+        void loadVolume();
+        void loadTransferFunction();
+        void quit();
 
-    void increaseSamples();
-    void decreaseSamples();
+        void increaseSamples();
+        void decreaseSamples();
 
-private:
-    Ui::Viewport* view;
+    private:
+        Ui::Viewport* view;
 
-    QAction* loadVolAction;
-    QAction* loadTFAction;
-    QAction* quitAction;
-    QAction* incSamplesAction;
-    QAction* decSamplesAction;
+        QAction* loadVolAction;
+        QAction* loadTFAction;
+        QAction* quitAction;
+        QAction* incSamplesAction;
+        QAction* decSamplesAction;
 
-    QMenu* fileMenu;
-    QMenu* editMenu;
+        QMenu* fileMenu;
+        QMenu* editMenu;
 
 
-    static const float STEP;
-};
+        static const float STEP;
+    };
 
 }
 
