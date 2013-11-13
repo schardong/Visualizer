@@ -11,7 +11,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Interface
 TEMPLATE = app
 
-
 SOURCES += \
     viewport.cpp \
     renderer.cpp \
@@ -37,6 +36,6 @@ config.files = $$OTHER_FILES
 
 INSTALLS += config
 
-LIBS += -ldl
-
 LIBS += -L$$OUT_PWD/../VisKernel -lVisKernel
+
+LIBS += -ldl

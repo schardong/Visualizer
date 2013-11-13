@@ -6,49 +6,52 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
-class VolumeData
+namespace ggraf
 {
-private:
-    int m_iVaoId;
-    int m_aTexIds[2];
-    glm::vec3 m_vDimensions;
-    glm::vec3 m_vScaleFactor;
-    glm::mat4 m_mModelMatrix;
-
-public:
-    VolumeData();
-    VolumeData(std::string volume_path, std::string tf_path, int width, int height, int slices, size_t bytes_per_pixel);
-    VolumeData(void* voxels, unsigned char* tff, int width, int height, int slices, size_t bytes_per_pixel);
-    ~VolumeData();
-
-    inline glm::mat4& getModelMatrix()
+    class VolumeData
     {
-        return m_mModelMatrix;
-    }
+    private:
+        int m_iVaoId;
+        int m_aTexIds[2];
+        glm::vec3 m_vDimensions;
+        glm::vec3 m_vScaleFactor;
+        glm::mat4 m_mModelMatrix;
 
-    inline int getVolumeTexId()
-    {
-        return m_aTexIds[0];
-    }
+    public:
+        VolumeData();
+        VolumeData(std::string volume_path, std::string tf_path, int width, int height, int slices, size_t bytes_per_pixel);
+        VolumeData(void* voxels, unsigned char* tff, int width, int height, int slices, size_t bytes_per_pixel);
+        ~VolumeData();
 
-    inline int getTransferFuncTexId()
-    {
-        return m_aTexIds[1];
-    }
+        inline glm::mat4& getModelMatrix()
+        {
+            return m_mModelMatrix;
+        }
 
-    inline bool isVolumeLoaded()
-    {
-        return m_aTexIds[0] == 0? false : true;
-    }
+        inline int getVolumeTexId()
+        {
+            return m_aTexIds[0];
+        }
 
-    inline bool isTfLoaded()
-    {
-        return m_aTexIds[1] == 0? false : true;
-    }
+        inline int getTransferFuncTexId()
+        {
+            return m_aTexIds[1];
+        }
 
-    void loadVolume(std::string path, int width, int height, int slices, int bytes_per_pixel);
-    void loadTransferFunction(std::string path, size_t bytes_per_pixel);
-    void render();
-};
+        inline bool isVolumeLoaded()
+        {
+            return m_aTexIds[0] == 0? false : true;
+        }
+
+        inline bool isTfLoaded()
+        {
+            return m_aTexIds[1] == 0? false : true;
+        }
+
+        void loadVolume(std::string path, int width, int height, int slices, int bytes_per_pixel);
+        void loadTransferFunction(std::string path, size_t bytes_per_pixel);
+        void render();
+    };
+}
 
 #endif // VOLUMEDATA_H

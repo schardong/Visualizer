@@ -1,7 +1,7 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include "viskernel.h"
+#include "kernel.h"
 
 class Renderer : public Scene
 {
@@ -28,7 +28,7 @@ private:
 
     Shader* fPass;
     Shader* sPass;
-    VolumeData* vd;
+    ggraf::VolumeData* vd;
 
     void loadUniforms(Renderer::SHADER_PASS);
     void checkUniforms(Renderer::SHADER_PASS);

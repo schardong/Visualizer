@@ -15,7 +15,7 @@ GLuint load3dTex(std::string filename, int w, int h, int slices, size_t bytes_pe
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    GLvoid* data = ResourceManager::getInstance()->loadVolumeData(filename, w, h, slices, bytes_per_pixel);
+    GLvoid* data = ggraf::ResourceManager::getInstance()->loadVolumeData(filename, w, h, slices, bytes_per_pixel);
     if(bytes_per_pixel == sizeof(GLushort)) {
         glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_UNSIGNED_SHORT, data);
     } else if(bytes_per_pixel == sizeof(GLubyte)) {
@@ -170,7 +170,7 @@ GLuint loadTransferFunction(std::string filename, size_t bytes_per_pixel)
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    GLubyte* data = ResourceManager::getInstance()->loadTransferFuncion(filename, bytes_per_pixel);
+    GLubyte* data = ggraf::ResourceManager::getInstance()->loadTransferFuncion(filename, bytes_per_pixel);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, file_size / 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
     free(data);

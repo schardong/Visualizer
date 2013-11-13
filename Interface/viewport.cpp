@@ -62,7 +62,7 @@ namespace Ui
     void Viewport::initializeGL()
     {
         makeCurrent();
-        VisKernel::getInstance()->init(format().majorVersion(), format().minorVersion());
+        ggraf::Kernel::getInstance()->init(format().majorVersion(), format().minorVersion());
 //        if(gl3wInit()) {
 //            cerr << "Failed to initialize OpenGL." << endl;
 //            return;

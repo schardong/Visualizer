@@ -16,13 +16,13 @@ Renderer::Renderer(int w, int h)
     : width(w),
       height(h)
 {
-    eye = glm::vec4(0, 0, 1, 1);
+    eye = glm::vec4(0, 0, 1.5, 1);
     projMatrix = glm::perspective(fovy, static_cast<float>(w) / static_cast<float>(h), 0.1f, 10.f);
     viewMatrix = glm::lookAt(glm::vec3(eye), glm::vec3(0, 0, -0.1), glm::vec3(0, 1, 0));
     fboId = fboTexId = depthBuffId = 0;
     fovy = 45;
     numSamples = 256.f;
-    vd = new VolumeData();
+    vd = new ggraf::VolumeData();
 }
 
 Renderer::~Renderer()

@@ -12,26 +12,28 @@ TARGET = VisKernel
 TEMPLATE = lib
 CONFIG += staticlib
 
-SOURCES += viskernel.cpp \
+SOURCES += \
     volumedata.cpp \
     shader.cpp \
     resources.cpp \
     resourcemanager.cpp \
-    gl3w.c
+    gl3w.c \
+    kernel.cpp
 
-HEADERS += viskernel.h \
+HEADERS += \
     volumedata.h \
     singleton.h \
     shader.h \
     scene.h \
     resources.h \
-    resourcemanager.h
+    resourcemanager.h \
+    kernel.h
 
 INCLUDEPATH += ../include
 
 header.path = ../include
 header.files = $$HEADERS
-target.path = $$OUT_PWD
+#target.path = $$OUT_PWD
 
 INSTALLS +=  header
 

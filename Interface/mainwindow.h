@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "viskernel.h"
+#include "kernel.h"
 #include "viewport.h"
 
 #include <QMainWindow>

@@ -1,7 +1,7 @@
 #ifndef VIEWPORT_H
 #define VIEWPORT_H
 
-#include "viskernel.h"
+#include "kernel.h"
 #include "renderer.h"
 #include <QGLWidget>
 
