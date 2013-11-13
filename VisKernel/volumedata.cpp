@@ -91,7 +91,17 @@ namespace ggraf
         }
 
         void* voxels = ggraf::ResourceManager::getInstance()->loadVolumeData(path, width, height, slices, bytes_per_pixel);
-        m_aTexIds[0] = ggraf::ResourceManager::getInstance()->createVolumeTex(width, height, slices, bytes_per_pixel, voxels);
+
+        if(m_aTexIds[0] != 0) {
+            if(ggraf::ResourceManager::getInstance()->uploadVolumeData(width, height, slices, bytes_per_pixel, voxels, m_aTexIds[0]) == false) {
+                cerr << "TROUBLE AT loadVolume!" << endl;
+                exit(1);
+            } else {
+                cout << "NO TROUBLE AT ALL\n";
+            }
+        } else {
+            m_aTexIds[0] = ggraf::ResourceManager::getInstance()->createVolumeTex(width, height, slices, bytes_per_pixel, voxels);
+        }
 
         m_vDimensions = glm::vec3(width, height, slices);
         m_vScaleFactor = glm::normalize(m_vDimensions);
@@ -106,7 +116,17 @@ namespace ggraf
     void VolumeData::loadTransferFunction(std::string path, size_t bytes_per_pixel)
     {
         unsigned char* tf = ggraf::ResourceManager::getInstance()->loadTransferFuncion(path, bytes_per_pixel);
-        m_aTexIds[1] = ggraf::ResourceManager::getInstance()->createTransferFuncTex(bytes_per_pixel, tf);
+
+        if(m_aTexIds[1] != 0) {
+            if(ggraf::ResourceManager::getInstance()->uploadTransferFuncData(bytes_per_pixel, tf, m_aTexIds[1]) == false) {
+                cout << "TROUBLE AT loadTF\n";
+                exit(2);
+            } else {
+                cout << "NO TROUBLE AT ALL\n";
+            }
+        } else {
+            m_aTexIds[1] = ggraf::ResourceManager::getInstance()->createTransferFuncTex(bytes_per_pixel, tf);
+        }
 
         free(tf);
         tf = NULL;

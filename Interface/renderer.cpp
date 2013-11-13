@@ -292,12 +292,10 @@ void Renderer::loadVolume(std::string path)
     fPass = new Shader("firstPass.vert", "firstPass.frag");
     fPass->bind();
     loadUniforms(FIRST);
-    checkUniforms(FIRST);
 
     sPass = new Shader("secondPass.vert", "secondPass.frag");
     sPass->bind();
     loadUniforms(SECOND);
-    checkUniforms(SECOND);
 
     Shader::unbind();
 }

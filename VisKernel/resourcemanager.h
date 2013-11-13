@@ -22,6 +22,10 @@ namespace ggraf
         GLuint createVolumeTex(int w, int h, int slices, size_t bytes_per_pixel, void* data);
         GLuint createTransferFuncTex(size_t bytes_per_pixel, unsigned char* data);
         GLuint createCubeVAO();
+
+        bool uploadVolumeData(int w, int h, int slices, size_t bytes_per_pixel, void* data, GLuint texId);
+        bool uploadTransferFuncData(size_t bytes_per_pixel, unsigned char* data, GLuint texId);
+
         void destroyCubeVao(GLuint cube_id);
     };
 }

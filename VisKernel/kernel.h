@@ -3,7 +3,6 @@
 
 #include "GL3/gl3w.h"
 #include "resourcemanager.h"
-#include "resources.h"
 #include "scene.h"
 #include "shader.h"
 #include "singleton.h"

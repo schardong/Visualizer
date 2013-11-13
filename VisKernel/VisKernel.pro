@@ -15,7 +15,6 @@ CONFIG += staticlib
 SOURCES += \
     volumedata.cpp \
     shader.cpp \
-    resources.cpp \
     resourcemanager.cpp \
     gl3w.c \
     kernel.cpp
@@ -25,7 +24,6 @@ HEADERS += \
     singleton.h \
     shader.h \
     scene.h \
-    resources.h \
     resourcemanager.h \
     kernel.h
 

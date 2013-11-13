@@ -152,6 +152,39 @@ namespace ggraf
     }
 
 
+    bool ResourceManager::uploadVolumeData(int w, int h, int slices, size_t bytes_per_pixel, void* data, GLuint texId)
+    {
+        if(texId == 0 || data == NULL)
+            return false;
+
+        glBindTexture(GL_TEXTURE_3D, texId);
+
+        if(bytes_per_pixel == sizeof(GLushort))
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_UNSIGNED_SHORT, data);
+        else if(bytes_per_pixel == sizeof(GLubyte))
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+
+        glBindTexture(GL_TEXTURE_3D, 0);
+
+        return true;
+    }
+
+    bool ResourceManager::uploadTransferFuncData(size_t bytes_per_pixel, unsigned char* data, GLuint texId)
+    {
+        if(texId == 0 || data == NULL)
+            return false;
+
+        size_t sz = bytes_per_pixel == sizeof(GLushort) ? 4096 * 4 : 256 * 4;
+
+        glBindTexture(GL_TEXTURE_1D, texId);
+
+        glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, sz / 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+        glBindTexture(GL_TEXTURE_1D, 0);
+
+        return true;
+    }
+
     void ResourceManager::destroyCubeVao(GLuint cube_id)
     {
         if(cube_id != 0)
