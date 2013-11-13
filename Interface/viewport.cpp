@@ -62,15 +62,16 @@ namespace Ui
     void Viewport::initializeGL()
     {
         makeCurrent();
-        if(gl3wInit()) {
-            cerr << "Failed to initialize OpenGL." << endl;
-            return;
-        }
+        VisKernel::getInstance()->init(format().majorVersion(), format().minorVersion());
+//        if(gl3wInit()) {
+//            cerr << "Failed to initialize OpenGL." << endl;
+//            return;
+//        }
 
-        if(!gl3wIsSupported(format().majorVersion(), format().minorVersion())) {
-            cerr << "OpenGL " << format().majorVersion() << "." << format().minorVersion() << " is not supported." << endl;
-            return;
-        }
+//        if(!gl3wIsSupported(format().majorVersion(), format().minorVersion())) {
+//            cerr << "OpenGL " << format().majorVersion() << "." << format().minorVersion() << " is not supported." << endl;
+//            return;
+//        }
         cout << "\nOpenGL " << glGetString(GL_VERSION) << "\nGLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
 
         glEnable(GL_TEXTURE_1D);
@@ -78,7 +79,7 @@ namespace Ui
         glEnable(GL_TEXTURE_3D);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
-        glClearColor(0.1f, 0.1f, 0.f, 1.f);
+        glClearColor(0.f, 0.f, 0.f, 1.f);
 
         scene = new Renderer(width(), height());
         scene->init();

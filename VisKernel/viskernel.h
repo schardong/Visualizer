@@ -12,11 +12,17 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-class VisKernel
+class VisKernel : public Singleton<VisKernel>
 {
+private:
+    friend class Singleton<VisKernel>;
+    bool initialized;
 
+    VisKernel() {}
+    ~VisKernel() {}
 public:
-    VisKernel();
+    bool init(int majVersion, int minVersion);
+    bool destroy();
 };
 
 #endif // VISKERNEL_H
