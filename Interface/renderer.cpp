@@ -22,7 +22,7 @@ Renderer::Renderer(int w, int h)
     fboId = fboTexId = depthBuffId = 0;
     fovy = 45;
     numSamples = 256.f;
-    vd = new ggraf::VolumeData();
+    vd = new ggraf::VolumeData("/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8", "/home/guilherme/Pictures/datasets/tff1.uint8");
 }
 
 Renderer::~Renderer()
@@ -42,7 +42,7 @@ Renderer::~Renderer()
     projMatrix = glm::mat4();
     viewMatrix = glm::mat4();
 
-    Shader::unbind();
+    ggraf::Shader::unbind();
     delete fPass;
     delete sPass;
 }
@@ -101,15 +101,15 @@ void Renderer::init()
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    fPass = new Shader("firstPass.vert", "firstPass.frag");
+    fPass = new ggraf::Shader("firstPass.vert", "firstPass.frag");
     fPass->bind();
     loadUniforms(FIRST);
 
-    sPass = new Shader("secondPass.vert", "secondPass.frag");
+    sPass = new ggraf::Shader("secondPass.vert", "secondPass.frag");
     sPass->bind();
     loadUniforms(SECOND);
 
-    Shader::unbind();
+    ggraf::Shader::unbind();
 }
 
 void Renderer::destroy() {}
@@ -130,7 +130,7 @@ void Renderer::render()
     glCullFace(GL_FRONT);
     vd->render();
     glDisable(GL_CULL_FACE);
-    Shader::unbind();
+    ggraf::Shader::unbind();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, width, height);
 
@@ -141,7 +141,7 @@ void Renderer::render()
     glCullFace(GL_BACK);
     vd->render();
     glDisable(GL_CULL_FACE);
-    Shader::unbind();
+    ggraf::Shader::unbind();
 }
 
 void Renderer::resize(int w, int h)
@@ -164,7 +164,7 @@ void Renderer::moveCamera(float distance)
 
 void Renderer::loadUniforms(Renderer::SHADER_PASS p)
 {
-    Shader* s;
+    ggraf::Shader* s;
     if(vd->isVolumeLoaded() && vd->isTfLoaded()) {
         if(p == FIRST) {
             s = fPass;
@@ -196,7 +196,7 @@ void Renderer::loadUniforms(Renderer::SHADER_PASS p)
 
 void Renderer::checkUniforms(Renderer::SHADER_PASS p)
 {
-    Shader* s;
+    ggraf::Shader* s;
     if(vd->isVolumeLoaded() && vd->isTfLoaded()) {
         float* pMat;
         float* vMat;
@@ -264,70 +264,42 @@ void Renderer::checkUniforms(Renderer::SHADER_PASS p)
 
 void Renderer::loadVolume(std::string path)
 {
-    int w, h, s;
-    size_t bytes;
-
     if(path.empty()) {
         cerr << "Renderer::loadVolume -> ERROR: Invalid path provided. Volume not loaded." << endl;
         return;
     }
 
-    std::vector<std::string> strs;
-    boost::algorithm::split(strs, path, boost::is_any_of("."));
+    vd->loadVolume(path);
 
-    if(strs[2] == "uint8")
-        bytes = 1;
-    else
-        bytes = 2;
-
-    std::vector<std::string> dims_str;
-    boost::algorithm::split(dims_str, strs[1], boost::is_any_of("x"));
-
-    std::istringstream(dims_str[0]) >> w;
-    std::istringstream(dims_str[1]) >> h;
-    std::istringstream(dims_str[2]) >> s;
-
-    vd->loadVolume(path, w, h, s, bytes);
-
-    fPass = new Shader("firstPass.vert", "firstPass.frag");
+    fPass = new ggraf::Shader("firstPass.vert", "firstPass.frag");
     fPass->bind();
     loadUniforms(FIRST);
 
-    sPass = new Shader("secondPass.vert", "secondPass.frag");
+    sPass = new ggraf::Shader("secondPass.vert", "secondPass.frag");
     sPass->bind();
     loadUniforms(SECOND);
 
-    Shader::unbind();
+    ggraf::Shader::unbind();
 }
 
 void Renderer::loadTransferFunction(std::string path)
 {
-    int bytes;
-
     if(path.empty()) {
         cerr << "Renderer::loadTransferFunction -> ERROR: Invalid path provided. Transfer function not loaded." << endl;
         return;
     }
 
-    std::vector<std::string> strs;
-    boost::algorithm::split(strs, path, boost::is_any_of("."));
+    vd->loadTransferFunction(path);
 
-    if(strs.back() == "uint8")
-        bytes = 1;
-    else
-        bytes = 2;
-
-    vd->loadTransferFunction(path, bytes);
-
-    fPass = new Shader("firstPass.vert", "firstPass.frag");
+    fPass = new ggraf::Shader("firstPass.vert", "firstPass.frag");
     fPass->bind();
     loadUniforms(FIRST);
 
-    sPass = new Shader("secondPass.vert", "secondPass.frag");
+    sPass = new ggraf::Shader("secondPass.vert", "secondPass.frag");
     sPass->bind();
     loadUniforms(SECOND);
 
-    Shader::unbind();
+    ggraf::Shader::unbind();
 }
 
 void Renderer::setNumSamples(float n)

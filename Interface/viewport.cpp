@@ -63,15 +63,7 @@ namespace Ui
     {
         makeCurrent();
         ggraf::Kernel::getInstance()->init(format().majorVersion(), format().minorVersion());
-//        if(gl3wInit()) {
-//            cerr << "Failed to initialize OpenGL." << endl;
-//            return;
-//        }
 
-//        if(!gl3wIsSupported(format().majorVersion(), format().minorVersion())) {
-//            cerr << "OpenGL " << format().majorVersion() << "." << format().minorVersion() << " is not supported." << endl;
-//            return;
-//        }
         cout << "\nOpenGL " << glGetString(GL_VERSION) << "\nGLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
 
         glEnable(GL_TEXTURE_1D);
@@ -125,11 +117,9 @@ namespace Ui
     void Viewport::wheelEvent(QWheelEvent* e)
     {
         if(e->delta() > 0) {
-            cout << e->delta() << endl;
-            scene->moveCamera(0.1f);
+            scene->setNumSamples(scene->getNumSamples() + 8);
         } else {
-            cout << e->delta() << endl;
-            scene->moveCamera(0.1f);
+            scene->setNumSamples(scene->getNumSamples() - 8);
         }
     }
 

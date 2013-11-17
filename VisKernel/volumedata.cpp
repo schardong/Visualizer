@@ -4,6 +4,9 @@
 
 #include <cstring>
 #include <iostream>
+#include <vector>
+#include <sstream>
+#include <boost/algorithm/string.hpp>
 
 using std::cout;
 using std::cerr;
@@ -17,45 +20,13 @@ namespace ggraf
         m_iVaoId = ggraf::ResourceManager::getInstance()->createCubeVAO();
     }
 
-    VolumeData::VolumeData(std::string volume_path, std::string tf_path, int width, int height, int slices, size_t bytes_per_pixel)
+    VolumeData::VolumeData(std::string volume_path, std::string tf_path)
     {
-        void* voxels = ggraf::ResourceManager::getInstance()->loadVolumeData(volume_path, width, height, slices, bytes_per_pixel);
-        m_aTexIds[0] = ggraf::ResourceManager::getInstance()->createVolumeTex(width, height, slices, bytes_per_pixel, voxels);
-
-        unsigned char* tf = ggraf::ResourceManager::getInstance()->loadTransferFuncion(tf_path, bytes_per_pixel);
-        m_aTexIds[1] = ggraf::ResourceManager::getInstance()->createTransferFuncTex(bytes_per_pixel, tf);
+        m_aTexIds[0] = m_aTexIds[1] = 0;
+        loadVolume(volume_path);
+        loadTransferFunction(tf_path);
 
         m_iVaoId = ggraf::ResourceManager::getInstance()->createCubeVAO();
-
-        m_vDimensions = glm::vec3(width, height, slices);
-        m_vScaleFactor = glm::normalize(m_vDimensions);
-
-        m_mModelMatrix = glm::scale(glm::mat4(1.f), m_vScaleFactor);
-        m_mModelMatrix = glm::translate<float>(m_mModelMatrix, glm::vec3(-.5, -.5, -.5));
-
-        free(voxels);
-        free(tf);
-        voxels = NULL;
-        tf = NULL;
-    }
-
-    VolumeData::VolumeData(void* voxels, unsigned char* tff, int width, int height, int slices, size_t bytes_per_pixel)
-    {
-        if(voxels == NULL || tff == NULL) {
-            cerr << "Error: invalid data. (VolumeData::VolumeData(void* voxels, unsigned char* tff, int width, int height, int slices, size_t bytes_per_pixel))" << endl;
-            return;
-        }
-
-        m_aTexIds[0] = ggraf::ResourceManager::getInstance()->createVolumeTex(width, height, slices, bytes_per_pixel, voxels);
-        m_aTexIds[1] = ggraf::ResourceManager::getInstance()->createTransferFuncTex(bytes_per_pixel, tff);
-
-        m_iVaoId = ggraf::ResourceManager::getInstance()->createCubeVAO();
-
-        m_vDimensions = glm::vec3(width, height, slices);
-        m_vScaleFactor = glm::normalize(m_vDimensions);
-
-        m_mModelMatrix = glm::scale(glm::mat4(1.f), m_vScaleFactor);
-        m_mModelMatrix = glm::translate<float>(m_mModelMatrix, glm::vec3(-.5, -.5, -.5));
     }
 
     VolumeData::~VolumeData()
@@ -83,27 +54,29 @@ namespace ggraf
         glBindVertexArray(0);
     }
 
-    void VolumeData::loadVolume(std::string path, int width, int height, int slices, int bytes_per_pixel)
+    void VolumeData::loadVolume(std::string path)
     {
         if(path.empty()) {
             cerr << "Invalid path provided, volume not loaded." << endl;
             return;
         }
 
-        void* voxels = ggraf::ResourceManager::getInstance()->loadVolumeData(path, width, height, slices, bytes_per_pixel);
+        ParsedVolPath* v = parseVolumePath(path);
+
+        void* voxels = ggraf::ResourceManager::getInstance()->loadVolumeData(v->path, v->dim[0], v->dim[1], v->dim[2], v->bytes_per_pixel);
 
         if(m_aTexIds[0] != 0) {
-            if(ggraf::ResourceManager::getInstance()->uploadVolumeData(width, height, slices, bytes_per_pixel, voxels, m_aTexIds[0]) == false) {
+            if(ggraf::ResourceManager::getInstance()->uploadVolumeData(v->dim[0], v->dim[1], v->dim[2], v->bytes_per_pixel, voxels, m_aTexIds[0]) == false) {
                 cerr << "TROUBLE AT loadVolume!" << endl;
                 exit(1);
             } else {
                 cout << "NO TROUBLE AT ALL\n";
             }
         } else {
-            m_aTexIds[0] = ggraf::ResourceManager::getInstance()->createVolumeTex(width, height, slices, bytes_per_pixel, voxels);
+            m_aTexIds[0] = ggraf::ResourceManager::getInstance()->createVolumeTex(v->dim[0], v->dim[1], v->dim[2], v->bytes_per_pixel, voxels);
         }
 
-        m_vDimensions = glm::vec3(width, height, slices);
+        m_vDimensions = glm::vec3(v->dim[0], v->dim[1], v->dim[2]);
         m_vScaleFactor = glm::normalize(m_vDimensions);
 
         m_mModelMatrix = glm::scale(glm::mat4(1.f), m_vScaleFactor);
@@ -113,22 +86,67 @@ namespace ggraf
         voxels = NULL;
     }
 
-    void VolumeData::loadTransferFunction(std::string path, size_t bytes_per_pixel)
+    void VolumeData::loadTransferFunction(std::string path)
     {
-        unsigned char* tf = ggraf::ResourceManager::getInstance()->loadTransferFuncion(path, bytes_per_pixel);
+        if(path.empty()) {
+            cerr << "Invalid path provided, transfer function not loaded." << endl;
+            return;
+        }
+
+        ParsedTFPath* tfp = parseTFPath(path);
+
+        unsigned char* tf = ggraf::ResourceManager::getInstance()->loadTransferFuncion(tfp->path, tfp->bytes_per_pixel);
 
         if(m_aTexIds[1] != 0) {
-            if(ggraf::ResourceManager::getInstance()->uploadTransferFuncData(bytes_per_pixel, tf, m_aTexIds[1]) == false) {
+            if(ggraf::ResourceManager::getInstance()->uploadTransferFuncData(tfp->bytes_per_pixel, tf, m_aTexIds[1]) == false) {
                 cout << "TROUBLE AT loadTF\n";
                 exit(2);
             } else {
                 cout << "NO TROUBLE AT ALL\n";
             }
         } else {
-            m_aTexIds[1] = ggraf::ResourceManager::getInstance()->createTransferFuncTex(bytes_per_pixel, tf);
+            m_aTexIds[1] = ggraf::ResourceManager::getInstance()->createTransferFuncTex(tfp->bytes_per_pixel, tf);
         }
 
         free(tf);
         tf = NULL;
+    }
+
+    VolumeData::ParsedVolPath* VolumeData::parseVolumePath(std::string path)
+    {
+        if(path.empty())
+            return NULL;
+
+        ParsedVolPath* v = new ParsedVolPath;
+        std::vector<std::string> strs;
+        boost::algorithm::split(strs, path, boost::is_any_of("."));
+
+        v->path = path;
+
+        v->bytes_per_pixel = strs[2] == "uint8" ? sizeof(GLubyte) : sizeof(GLushort);
+
+        std::vector<std::string> dims_strs;
+        boost::algorithm::split(dims_strs, strs[1], boost::is_any_of("x"));
+
+        std::istringstream(dims_strs[0]) >> v->dim[0];
+        std::istringstream(dims_strs[1]) >> v->dim[1];
+        std::istringstream(dims_strs[2]) >> v->dim[2];
+
+        return v;
+    }
+
+    VolumeData::ParsedTFPath* VolumeData::parseTFPath(std::string path)
+    {
+        if(path.empty())
+            return NULL;
+
+        ParsedTFPath* tf = new ParsedTFPath;
+        std::vector<std::string> strs;
+        boost::algorithm::split(strs, path, boost::is_any_of("."));
+
+        tf->path = path;
+        tf->bytes_per_pixel = strs.back() == "uint8" ? sizeof(GLubyte) : sizeof(GLushort);
+
+        return tf;
     }
 }

@@ -26,8 +26,8 @@ private:
     int height;
     float numSamples;
 
-    Shader* fPass;
-    Shader* sPass;
+    ggraf::Shader* fPass;
+    ggraf::Shader* sPass;
     ggraf::VolumeData* vd;
 
     void loadUniforms(Renderer::SHADER_PASS);

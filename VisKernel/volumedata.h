@@ -1,10 +1,9 @@
 #ifndef VOLUMEDATA_H
 #define VOLUMEDATA_H
 
-#include "resources.h"
-
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
+#include <string>
 
 namespace ggraf
 {
@@ -17,10 +16,25 @@ namespace ggraf
         glm::vec3 m_vScaleFactor;
         glm::mat4 m_mModelMatrix;
 
+        typedef struct
+        {
+            std::string path;
+            int dim[3];
+            size_t bytes_per_pixel;
+        } ParsedVolPath;
+
+        typedef struct
+        {
+            std::string path;
+            size_t bytes_per_pixel;
+        } ParsedTFPath;
+
+        ParsedVolPath* parseVolumePath(std::string path);
+        ParsedTFPath* parseTFPath(std::string path);
+
     public:
         VolumeData();
-        VolumeData(std::string volume_path, std::string tf_path, int width, int height, int slices, size_t bytes_per_pixel);
-        VolumeData(void* voxels, unsigned char* tff, int width, int height, int slices, size_t bytes_per_pixel);
+        VolumeData(std::string volume_path, std::string tf_path);
         ~VolumeData();
 
         inline glm::mat4& getModelMatrix()
@@ -48,8 +62,8 @@ namespace ggraf
             return m_aTexIds[1] == 0? false : true;
         }
 
-        void loadVolume(std::string path, int width, int height, int slices, int bytes_per_pixel);
-        void loadTransferFunction(std::string path, size_t bytes_per_pixel);
+        void loadVolume(std::string path);
+        void loadTransferFunction(std::string path);
         void render();
     };
 }
