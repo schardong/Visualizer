@@ -45,7 +45,7 @@ namespace Ui
         resize(800, 600);
 
         QGLFormat f;
-        f.setVersion(3, 3);
+        f.setVersion(4, 2);
         f.setProfile(QGLFormat::CoreProfile);
 
         view = new Ui::Viewport(f, this);

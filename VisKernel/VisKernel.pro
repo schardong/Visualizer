@@ -8,6 +8,8 @@ QT       += opengl
 
 QT       -= core gui
 
+QMAKE_CXXFLAGS += -std=c++11
+
 TARGET = VisKernel
 TEMPLATE = lib
 CONFIG += staticlib
@@ -17,7 +19,8 @@ SOURCES += \
     shader.cpp \
     resourcemanager.cpp \
     gl3w.c \
-    kernel.cpp
+    kernel.cpp \
+    logger.cpp
 
 HEADERS += \
     volumedata.h \
@@ -25,7 +28,8 @@ HEADERS += \
     shader.h \
     scene.h \
     resourcemanager.h \
-    kernel.h
+    kernel.h \
+    logger.h
 
 INCLUDEPATH += ../include
 

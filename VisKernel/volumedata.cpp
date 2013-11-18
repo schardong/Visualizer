@@ -1,6 +1,7 @@
 #include "GL3/gl3w.h"
 #include "volumedata.h"
 #include "resourcemanager.h"
+#include "logger.h"
 
 #include <cstring>
 #include <iostream>
@@ -56,8 +57,10 @@ namespace ggraf
 
     void VolumeData::loadVolume(std::string path)
     {
+        Logger::getInstance()->log("ggraf::VolumeData::loadVolume(" + path + ")");
+
         if(path.empty()) {
-            cerr << "Invalid path provided, volume not loaded." << endl;
+            Logger::getInstance()->error("Invalid path provided, volume not loaded.");
             return;
         }
 
@@ -67,14 +70,11 @@ namespace ggraf
 
         if(m_aTexIds[0] != 0) {
             if(ggraf::ResourceManager::getInstance()->uploadVolumeData(v->dim[0], v->dim[1], v->dim[2], v->bytes_per_pixel, voxels, m_aTexIds[0]) == false) {
-                cerr << "TROUBLE AT loadVolume!" << endl;
-                exit(1);
-            } else {
-                cout << "NO TROUBLE AT ALL\n";
+                Logger::getInstance()->error("Failed to upload the volume to the GPU.");
+                return;
             }
-        } else {
+        } else
             m_aTexIds[0] = ggraf::ResourceManager::getInstance()->createVolumeTex(v->dim[0], v->dim[1], v->dim[2], v->bytes_per_pixel, voxels);
-        }
 
         m_vDimensions = glm::vec3(v->dim[0], v->dim[1], v->dim[2]);
         m_vScaleFactor = glm::normalize(m_vDimensions);
@@ -88,8 +88,9 @@ namespace ggraf
 
     void VolumeData::loadTransferFunction(std::string path)
     {
+        Logger::getInstance()->log("ggraf::VolumeData::loadTransferFunction(" + path + ")");
         if(path.empty()) {
-            cerr << "Invalid path provided, transfer function not loaded." << endl;
+            Logger::getInstance()->error("Invalid path provided, transfer function not loaded.");
             return;
         }
 
@@ -99,14 +100,11 @@ namespace ggraf
 
         if(m_aTexIds[1] != 0) {
             if(ggraf::ResourceManager::getInstance()->uploadTransferFuncData(tfp->bytes_per_pixel, tf, m_aTexIds[1]) == false) {
-                cout << "TROUBLE AT loadTF\n";
-                exit(2);
-            } else {
-                cout << "NO TROUBLE AT ALL\n";
+                Logger::getInstance()->error("Failed to upload the transfer function to the GPU.");
+                return;
             }
-        } else {
+        } else
             m_aTexIds[1] = ggraf::ResourceManager::getInstance()->createTransferFuncTex(tfp->bytes_per_pixel, tf);
-        }
 
         free(tf);
         tf = NULL;

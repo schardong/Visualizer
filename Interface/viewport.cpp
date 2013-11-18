@@ -64,7 +64,7 @@ namespace Ui
         makeCurrent();
         ggraf::Kernel::getInstance()->init(format().majorVersion(), format().minorVersion());
 
-        cout << "\nOpenGL " << glGetString(GL_VERSION) << "\nGLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
+//        cout << "\nOpenGL " << glGetString(GL_VERSION) << "\nGLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
 
         glEnable(GL_TEXTURE_1D);
         glEnable(GL_TEXTURE_2D);

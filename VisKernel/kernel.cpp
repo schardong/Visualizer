@@ -1,6 +1,7 @@
 #include "kernel.h"
 
 #include <iostream>
+#include <cstdio>
 
 using std::cerr;
 using std::endl;
@@ -11,13 +12,17 @@ namespace ggraf
     {
         initialized = false;
 
+        Logger::getInstance()->log("ggraf::Kernel::init");
+
         if(gl3wInit()) {
-            cerr << "Failed to initialize OpenGL." << endl;
+            Logger::getInstance()->error("Failed to initialize OpenGL");
             return initialized;
         }
 
         if(!gl3wIsSupported(majVersion, minVersion)) {
-            cerr << "OpenGL " << majVersion << "." << minVersion << " is not supported." << endl;
+            char version[4];
+            sprintf(version, "%d.%d", majVersion, minVersion);
+            Logger::getInstance()->error("OpenGL " + std::string(version) + " is not supported.");
             return initialized;
         }
 

@@ -1,6 +1,9 @@
 #include "resourcemanager.h"
+#include "logger.h"
 
 #include <iostream>
+#include <string>
+#include <fstream>
 #include <cstdio>
 
 using std::cout;
@@ -14,8 +17,15 @@ namespace ggraf
         FILE* fp;
         size_t num_voxels = w * h * slices;
 
+        Logger::getInstance()->log("ggraf::ResourceManager::loadVolumeData(" +
+                                   filename + " " +
+                                   std::to_string(w) + " " +
+                                   std::to_string(h) + " " +
+                                   std::to_string(slices) + " " +
+                                   std::to_string(bytes_per_pixel) + ")");
+
         if(!(fp = fopen(filename.c_str(), "rb"))) {
-            std::cerr << "ERROR: Failed to open the file " << filename << std::endl;
+            Logger::getInstance()->error("Failed to open the file " + filename);
             exit(EXIT_FAILURE);
         }
 
@@ -38,8 +48,12 @@ namespace ggraf
         FILE* fp;
         size_t num_rgba = bytes_per_pixel == sizeof(unsigned short) ? 4096 * 4 : 256 * 4;
 
+        Logger::getInstance()->log("ggraf::ResourceManager::loadTransferFuncion(" +
+                                   filename + " " +
+                                   std::to_string(bytes_per_pixel) + ")");
+
         if(!(fp = fopen(filename.c_str(), "rb"))) {
-            std::cerr << "ERROR: Failed to open the file " << filename << std::endl;
+            Logger::getInstance()->error("Failed to open the file " + filename);
             exit(EXIT_FAILURE);
         }
 

@@ -75,25 +75,25 @@ void Renderer::init()
     GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     switch(fboStatus) {
     case GL_FRAMEBUFFER_UNDEFINED:
-        cerr << "FBO undefined" << endl;
+        Logger::getInstance()->error("FBO undefined");
         break;
-    case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT :
-        cerr << "FBO incomplete attachment" << endl;
+    case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+        Logger::getInstance()->error("FBO incomplete attachment");
         break;
-    case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT :
-        cerr << "FBO missing attachment" << endl;
+    case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+        Logger::getInstance()->error("FBO missing attachment");
         break;
-    case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER :
-        cerr << "FBO incomplete draw buffer" << endl;
+    case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+        Logger::getInstance()->error("FBO incomplete draw buffe");
         break;
-    case GL_FRAMEBUFFER_UNSUPPORTED :
-        cerr << "FBO unsupported" << endl;
+    case GL_FRAMEBUFFER_UNSUPPORTED:
+        Logger::getInstance()->error("FBO unsupported");
         break;
     case GL_FRAMEBUFFER_COMPLETE:
-        cout << "FBO created successfully" << endl;
+        Logger::getInstance()->log("FBO created successfully");
         break;
     default:
-        cerr << "FBO generic problem" << endl;
+        Logger::getInstance()->error("FBO undefined problem");
     }
 
     GLenum drawBuffer[] = {GL_COLOR_ATTACHMENT0};
@@ -264,8 +264,10 @@ void Renderer::checkUniforms(Renderer::SHADER_PASS p)
 
 void Renderer::loadVolume(std::string path)
 {
+    Logger::getInstance()->log("Renderer::loadVolume(" + path + ")");
+
     if(path.empty()) {
-        cerr << "Renderer::loadVolume -> ERROR: Invalid path provided. Volume not loaded." << endl;
+        Logger::getInstance()->error("Invalid path provided. Volume not loaded.");
         return;
     }
 
@@ -284,8 +286,10 @@ void Renderer::loadVolume(std::string path)
 
 void Renderer::loadTransferFunction(std::string path)
 {
+    Logger::getInstance()->log("Renderer::loadTransferFunction(" + path + ")");
+
     if(path.empty()) {
-        cerr << "Renderer::loadTransferFunction -> ERROR: Invalid path provided. Transfer function not loaded." << endl;
+        Logger::getInstance()->error("Invalid path provided. Transfer function not loaded.");
         return;
     }
 
