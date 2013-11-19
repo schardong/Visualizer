@@ -24,8 +24,8 @@ namespace Ui
         void loadTransferFunction();
         void quit();
 
-        void increaseSamples();
-        void decreaseSamples();
+//        void increaseSamples();
+//        void decreaseSamples();
 
     private:
         Ui::Viewport* view;
@@ -33,12 +33,8 @@ namespace Ui
         QAction* loadVolAction;
         QAction* loadTFAction;
         QAction* quitAction;
-        QAction* incSamplesAction;
-        QAction* decSamplesAction;
 
         QMenu* fileMenu;
-        QMenu* editMenu;
-
 
         static const float STEP;
     };

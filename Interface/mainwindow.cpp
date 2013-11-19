@@ -23,26 +23,15 @@ namespace Ui
         quitAction = new QAction("Quit", this);
         connect(quitAction, SIGNAL(triggered()), this, SLOT(quit()));
 
-        incSamplesAction = new QAction("Increase Sampling", this);
-        connect(incSamplesAction, SIGNAL(triggered()), this, SLOT(increaseSamples()));
-
-        decSamplesAction = new QAction("Decrease Sampling", this);
-        connect(decSamplesAction, SIGNAL(triggered()), this, SLOT(decreaseSamples()));
-
         fileMenu = new QMenu("File", this);
         fileMenu->addAction(loadVolAction);
         fileMenu->addAction(loadTFAction);
         fileMenu->addSeparator();
         fileMenu->addAction(quitAction);
 
-        editMenu = new QMenu("Edit", this);
-        editMenu->addAction(incSamplesAction);
-        editMenu->addAction(decSamplesAction);
-
         menuBar()->addMenu(fileMenu);
-        menuBar()->addMenu(editMenu);
 
-        resize(800, 600);
+        resize(600, 600);
 
         QGLFormat f;
         f.setVersion(4, 2);
@@ -79,14 +68,14 @@ namespace Ui
         close();
     }
 
-    void MainWindow::increaseSamples()
-    {
-        view->setNumSamples(view->getNumSamples() + STEP);
-    }
+//    void MainWindow::increaseSamples()
+//    {
+//        view->setNumSamples(view->getNumSamples() + STEP);
+//    }
 
-    void MainWindow::decreaseSamples()
-    {
-        view->setNumSamples(view->getNumSamples() - STEP);
-    }
+//    void MainWindow::decreaseSamples()
+//    {
+//        view->setNumSamples(view->getNumSamples() - STEP);
+//    }
 
 }
