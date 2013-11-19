@@ -10,7 +10,7 @@ QT       -= core gui
 
 QMAKE_CXXFLAGS += -std=c++11
 
-TARGET = VisKernel
+TARGET = Kernel
 TEMPLATE = lib
 CONFIG += staticlib
 
