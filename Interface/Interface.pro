@@ -31,13 +31,12 @@ OTHER_FILES += \
     firstPass.frag
 
 INCLUDEPATH += ../include
-INCLUDEPATH += ../VisKernel
 
 config.path = $$OUT_PWD/
 config.files = $$OTHER_FILES
 
 INSTALLS += config
 
-LIBS += -L$$OUT_PWD/../VisKernel -lVisKernel
+LIBS += -L$$OUT_PWD/../Kernel -lKernel
 
 LIBS += -ldl
