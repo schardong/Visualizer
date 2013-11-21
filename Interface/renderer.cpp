@@ -102,27 +102,25 @@ void Renderer::init()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     fPass = new ggraf::Shader("firstPass.vert", "firstPass.frag");
+    sPass = new ggraf::Shader("secondPass.vert", "secondPass.frag");
+}
+
+void Renderer::destroy() {}
+
+void Renderer::update()
+{
     fPass->bind();
     loadUniforms(FIRST);
 
-    sPass = new ggraf::Shader("secondPass.vert", "secondPass.frag");
     sPass->bind();
     loadUniforms(SECOND);
 
     ggraf::Shader::unbind();
 }
 
-void Renderer::destroy() {}
-
-void Renderer::update(float)
-{
-}
-
 void Renderer::render()
 {
     fPass->bind();
-    loadUniforms(FIRST);
-
     glBindFramebuffer(GL_FRAMEBUFFER, fboId);
     glViewport(0, 0, width, height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -131,11 +129,11 @@ void Renderer::render()
     vd->render();
     glDisable(GL_CULL_FACE);
     ggraf::Shader::unbind();
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, width, height);
 
     sPass->bind();
-    loadUniforms(SECOND);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -155,11 +153,6 @@ void Renderer::resize(int w, int h)
 void Renderer::rotateCamera(glm::vec2 axis, float speed)
 {
     viewMatrix = glm::rotate(viewMatrix, speed, glm::vec3(axis, 0.f));
-}
-
-void Renderer::moveCamera(float distance)
-{
-    cout << "Renderer::moveCamera -> NOT IMPLEMENTED" << endl;
 }
 
 void Renderer::loadUniforms(Renderer::SHADER_PASS p)
@@ -194,74 +187,6 @@ void Renderer::loadUniforms(Renderer::SHADER_PASS p)
     }
 }
 
-void Renderer::checkUniforms(Renderer::SHADER_PASS p)
-{
-    ggraf::Shader* s;
-    if(vd->isVolumeLoaded() && vd->isTfLoaded()) {
-        float* pMat;
-        float* vMat;
-        float* mMat;
-
-        if(p == FIRST) {
-            s = fPass;
-        } else if(p == SECOND) {
-            s = sPass;
-
-            float* screenSize;
-            int* tex0;
-            int* tex1;
-            int* tex2;
-            float* samples;
-
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_3D, vd->getVolumeTexId());
-            tex0 = s->getUniformiv("u_sDensityMap", 1);
-
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_1D, vd->getTransferFuncTexId());
-            tex1 = s->getUniformiv("u_sTransferFunction", 1);
-
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, fboTexId);
-            tex2 = s->getUniformiv("u_sBackFaces", 1);
-
-            screenSize = s->getUniformfv("u_vScreenSize", 2);
-            samples = s->getUniformfv("u_fNumSamples", 1);
-
-            cout << "densityMap = " << *tex0 << endl;
-            cout << "tf = " << *tex1 << endl;
-            cout << "backfaces = " << *tex2 << endl;
-            cout << "screenSize = " << screenSize[0] << " x " << screenSize[1] << endl;
-            cout << "numSamples = " << *samples << endl;
-        }
-
-        pMat = s->getUniformfv("u_mProjectionMatrix", 16);
-        vMat = s->getUniformfv("u_mViewMatrix", 16);
-        mMat = s->getUniformfv("u_mModelMatrix", 16);
-
-        for(int i = 0; i < 16; i++) {
-            if(i % 4 == 0)
-                cout << endl;
-            cout << pMat[i] << " ";
-        }
-        cout << endl;
-
-        for(int i = 0; i < 16; i++) {
-            if(i % 4 == 0)
-                cout << endl;
-            cout << vMat[i] << " ";
-        }
-        cout << endl;
-
-        for(int i = 0; i < 16; i++) {
-            if(i % 4 == 0)
-                cout << endl;
-            cout << mMat[i] << " ";
-        }
-        cout << endl;
-    }
-}
-
 void Renderer::loadVolume(std::string path)
 {
     Logger::getInstance()->log("Renderer::loadVolume(" + path + ")");
@@ -272,16 +197,6 @@ void Renderer::loadVolume(std::string path)
     }
 
     vd->loadVolume(path);
-
-    fPass = new ggraf::Shader("firstPass.vert", "firstPass.frag");
-    fPass->bind();
-    loadUniforms(FIRST);
-
-    sPass = new ggraf::Shader("secondPass.vert", "secondPass.frag");
-    sPass->bind();
-    loadUniforms(SECOND);
-
-    ggraf::Shader::unbind();
 }
 
 void Renderer::loadTransferFunction(std::string path)
@@ -294,16 +209,6 @@ void Renderer::loadTransferFunction(std::string path)
     }
 
     vd->loadTransferFunction(path);
-
-    fPass = new ggraf::Shader("firstPass.vert", "firstPass.frag");
-    fPass->bind();
-    loadUniforms(FIRST);
-
-    sPass = new ggraf::Shader("secondPass.vert", "secondPass.frag");
-    sPass->bind();
-    loadUniforms(SECOND);
-
-    ggraf::Shader::unbind();
 }
 
 void Renderer::setNumSamples(float n)
@@ -315,4 +220,17 @@ void Renderer::setNumSamples(float n)
 float Renderer::getNumSamples()
 {
     return numSamples;
+}
+
+void Renderer::setFovy(float n)
+{
+    if(n > 0.f && fovy < 85.f) {
+        fovy = n;
+        projMatrix = glm::perspective(fovy, static_cast<float>(width) / static_cast<float>(height), 0.1f, 10.f);
+    }
+}
+
+float Renderer::getFovy()
+{
+    return fovy;
 }

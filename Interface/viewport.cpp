@@ -64,8 +64,6 @@ namespace Ui
         makeCurrent();
         ggraf::Kernel::getInstance()->init(format().majorVersion(), format().minorVersion());
 
-//        cout << "\nOpenGL " << glGetString(GL_VERSION) << "\nGLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
-
         glEnable(GL_TEXTURE_1D);
         glEnable(GL_TEXTURE_2D);
         glEnable(GL_TEXTURE_3D);
@@ -80,6 +78,7 @@ namespace Ui
 
     void Viewport::paintGL()
     {
+        scene->update();
         scene->render();
     }
 
@@ -90,36 +89,46 @@ namespace Ui
 
     void Viewport::mousePressEvent(QMouseEvent* e)
     {
-        QVector2D tmpMouseLoc = QVector2D(e->pos());
-        mousePressLoc = glm::vec2(tmpMouseLoc.x(), tmpMouseLoc.y());
+        if(e->buttons() & Qt::LeftButton) {
+            QVector2D tmpMouseLoc = QVector2D(e->pos());
+            mousePressLoc = glm::vec2(tmpMouseLoc.x(), tmpMouseLoc.y());
+        }
     }
 
     void Viewport::mouseReleaseEvent(QMouseEvent* e)
     {
-        QVector2D tmpMouseLoc = QVector2D(e->pos());
-        glm::vec2 mouseReleaseLoc = glm::vec2(tmpMouseLoc.x(), tmpMouseLoc.y());
+        if(e->button() & Qt::LeftButton) {
+            QVector2D tmpMouseLoc = QVector2D(e->pos());
+            glm::vec2 mouseReleaseLoc = glm::vec2(tmpMouseLoc.x(), tmpMouseLoc.y());
 
-        glm::vec2 mouseDiff = mouseReleaseLoc - mousePressLoc;
+            glm::vec2 mouseDiff = mouseReleaseLoc - mousePressLoc;
 
-        if(mouseDiff[0] == 0 && mouseDiff[1] == 0) {
-            rotSpeed = 0;
-            rotAxis = glm::vec2(0, 0);
-            return;
+            if(mouseDiff[0] == 0 && mouseDiff[1] == 0) {
+                rotSpeed = 0;
+                rotAxis = glm::vec2(0, 0);
+                return;
+            }
+
+            rotAxis = glm::normalize(glm::vec2(mouseDiff[1], mouseDiff[0]));
+
+            rotSpeed = glm::length(mouseDiff) / 10;
+            scene->rotateCamera(rotAxis, rotSpeed);
+            mousePressLoc = glm::vec2(0, 0);
         }
-
-        rotAxis = glm::normalize(glm::vec2(mouseDiff[1], mouseDiff[0]));
-
-        rotSpeed = glm::length(mouseDiff) / 10;
-        scene->rotateCamera(rotAxis, rotSpeed);
-        mousePressLoc = glm::vec2(0, 0);
     }
 
     void Viewport::wheelEvent(QWheelEvent* e)
     {
-        if(e->delta() > 0) {
-            scene->setNumSamples(scene->getNumSamples() + 8);
+        if(e->buttons() & Qt::RightButton) {
+            if(e->delta() > 0)
+                scene->setFovy(scene->getFovy() + 1);
+            else
+                scene->setFovy(scene->getFovy() - 1);
         } else {
-            scene->setNumSamples(scene->getNumSamples() - 8);
+            if(e->delta() > 0)
+                scene->setNumSamples(scene->getNumSamples() + 8);
+            else
+                scene->setNumSamples(scene->getNumSamples() - 8);
         }
     }
 

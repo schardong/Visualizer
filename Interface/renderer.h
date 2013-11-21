@@ -39,15 +39,16 @@ public:
 
     void init();
     void destroy();
-    void update(float);
+    void update();
     void render();
     void resize(int, int);
     void rotateCamera(glm::vec2, float);
-    void moveCamera(float);
     void loadVolume(std::string);
     void loadTransferFunction(std::string);
     void setNumSamples(float);
     float getNumSamples();
+    void setFovy(float);
+    float getFovy();
 };
 
 #endif // RENDERER_H
