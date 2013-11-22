@@ -55,6 +55,8 @@ namespace ggraf
 
         void bind();
         static void unbind();
+
+        void bindFragDataLoc(std::string name, int layLoc);
     };
 }
 #endif // SHADER_H

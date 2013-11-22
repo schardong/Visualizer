@@ -43,9 +43,7 @@ namespace ggraf
             glAttachShader(m_nProgId, m_nFragId);
         }
 
-        std::cerr << getProgramInfoLog(getProgramId(), GL_INFO_LOG_LENGTH) << std::endl;
         glLinkProgram(m_nProgId);
-        std::cerr << getProgramInfoLog(getProgramId(), GL_LINK_STATUS) << std::endl;
     }
 
     Shader::~Shader()
@@ -192,12 +190,17 @@ namespace ggraf
 
     void Shader::bind()
     {
-        glUseProgram(m_nProgId);
+        glUseProgram(getProgramId());
     }
 
     void Shader::unbind()
     {
         glUseProgram(0);
+    }
+
+    void Shader::bindFragDataLoc(std::string name, int layLoc)
+    {
+        glBindFragDataLocation(getProgramId(), layLoc, name.c_str());
     }
 
     const char* Shader::fileRead(const char* filename)

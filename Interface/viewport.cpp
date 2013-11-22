@@ -26,6 +26,7 @@ namespace Ui
         rotSpeed = 0;
         mousePressLoc = glm::vec2(0, 0);
         rotAxis = glm::vec2(0, 0);
+        showFullScreen();
     }
 
     Viewport::~Viewport()
@@ -121,9 +122,9 @@ namespace Ui
     {
         if(e->buttons() & Qt::RightButton) {
             if(e->delta() > 0)
-                scene->setFovy(scene->getFovy() + 1);
-            else
                 scene->setFovy(scene->getFovy() - 1);
+            else
+                scene->setFovy(scene->getFovy() + 1);
         } else {
             if(e->delta() > 0)
                 scene->setNumSamples(scene->getNumSamples() + 8);

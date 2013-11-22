@@ -103,6 +103,9 @@ void Renderer::init()
 
     fPass = new ggraf::Shader("firstPass.vert", "firstPass.frag");
     sPass = new ggraf::Shader("secondPass.vert", "secondPass.frag");
+    sPass->bind();
+    sPass->bindFragDataLoc("out_vColor", 0);
+    ggraf::Shader::unbind();
 }
 
 void Renderer::destroy() {}

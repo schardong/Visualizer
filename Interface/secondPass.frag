@@ -40,16 +40,12 @@ void main(void)
         colorSample.a = clamp(colorSample.a, 0.f, 1.f);
 
         colorSample.rgb *= colorSample.a;
-        out_vColor = (1.f - out_vColor.a) * colorSample + out_vColor;
+        colorAcc = (1.f - colorAcc.a) * colorSample + colorAcc;
 
-//        if(length(colorSample.rgb) > length(colorAcc.rgb))
-//            colorAcc = colorSample;
-
-        if(out_vColor.a > 0.95f || lenAcc >= len) {
+        if(colorAcc.a > 0.95f || lenAcc >= len) {
             break;
         }
     }
 
-//    out_vColor = vec4(1.f, 0, 1.f, 0);
-//    out_vColor = colorAcc;
+    out_vColor = colorAcc;
 }
