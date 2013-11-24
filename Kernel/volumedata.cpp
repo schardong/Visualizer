@@ -76,6 +76,8 @@ namespace ggraf
         } else
             m_aTexIds[0] = ggraf::ResourceManager::getInstance()->createVolumeTex(v->dim[0], v->dim[1], v->dim[2], v->bytes_per_pixel, voxels);
 
+        m_dataTypes.first = v->bytes_per_pixel;
+
         m_vDimensions = glm::vec3(v->dim[0], v->dim[1], v->dim[2]);
         m_vScaleFactor = glm::normalize(m_vDimensions);
 
@@ -105,6 +107,8 @@ namespace ggraf
             }
         } else
             m_aTexIds[1] = ggraf::ResourceManager::getInstance()->createTransferFuncTex(tfp->bytes_per_pixel, tf);
+
+        m_dataTypes.second = tfp->bytes_per_pixel;
 
         free(tf);
         tf = NULL;

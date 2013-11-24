@@ -15,6 +15,7 @@ namespace ggraf
         glm::vec3 m_vDimensions;
         glm::vec3 m_vScaleFactor;
         glm::mat4 m_mModelMatrix;
+        std::pair<size_t, size_t> m_dataTypes;
 
         typedef struct
         {
@@ -60,6 +61,11 @@ namespace ggraf
         inline bool isTfLoaded()
         {
             return m_aTexIds[1] == 0? false : true;
+        }
+
+        inline std::pair<size_t, size_t> getDataTypes()
+        {
+            return m_dataTypes;
         }
 
         void loadVolume(std::string path);

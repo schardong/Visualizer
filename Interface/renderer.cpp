@@ -123,26 +123,35 @@ void Renderer::update()
 
 void Renderer::render()
 {
-    fPass->bind();
-    glBindFramebuffer(GL_FRAMEBUFFER, fboId);
-    glViewport(0, 0, width, height);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
-    vd->render();
-    glDisable(GL_CULL_FACE);
-    ggraf::Shader::unbind();
+    if(vd->getDataTypes().first == vd->getDataTypes().second) {
+        fPass->bind();
+        glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+        vd->render();
+        glDisable(GL_CULL_FACE);
+        ggraf::Shader::unbind();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, width, height);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, width, height);
 
-    sPass->bind();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    vd->render();
-    glDisable(GL_CULL_FACE);
-    ggraf::Shader::unbind();
+        sPass->bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        vd->render();
+        glDisable(GL_CULL_FACE);
+        ggraf::Shader::unbind();
+    } else {
+        glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
 }
 
 void Renderer::resize(int w, int h)
@@ -153,15 +162,15 @@ void Renderer::resize(int w, int h)
     projMatrix = glm::perspective(fovy, static_cast<float>(w) / static_cast<float>(h), 0.1f, 10.f);
 }
 
-void Renderer::rotateCamera(glm::vec2 axis, float speed)
+void Renderer::rotateCamera(glm::vec3 axis, float speed)
 {
-    viewMatrix = glm::rotate(viewMatrix, speed, glm::vec3(axis, 0.f));
+    viewMatrix = glm::rotate(viewMatrix, speed, axis);
 }
 
 void Renderer::loadUniforms(Renderer::SHADER_PASS p)
 {
-    ggraf::Shader* s;
     if(vd->isVolumeLoaded() && vd->isTfLoaded()) {
+        ggraf::Shader* s;
         if(p == FIRST) {
             s = fPass;
         } else if(p == SECOND) {

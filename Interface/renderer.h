@@ -42,7 +42,7 @@ public:
     void update();
     void render();
     void resize(int, int);
-    void rotateCamera(glm::vec2, float);
+    void rotateCamera(glm::vec3, float);
     void loadVolume(std::string);
     void loadTransferFunction(std::string);
     void setNumSamples(float);

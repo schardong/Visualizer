@@ -16,7 +16,7 @@ namespace Ui
         Renderer* scene;
 
         glm::vec2 mousePressLoc;
-        glm::vec2 rotAxis;
+        glm::vec3 rotAxis;
         float rotSpeed;
 
     public:

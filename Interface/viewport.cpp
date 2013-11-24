@@ -25,7 +25,7 @@ namespace Ui
         scene = NULL;
         rotSpeed = 0;
         mousePressLoc = glm::vec2(0, 0);
-        rotAxis = glm::vec2(0, 0);
+        rotAxis = glm::vec3(0, 0, 0);
         showFullScreen();
     }
 
@@ -106,11 +106,11 @@ namespace Ui
 
             if(mouseDiff[0] == 0 && mouseDiff[1] == 0) {
                 rotSpeed = 0;
-                rotAxis = glm::vec2(0, 0);
+                rotAxis = glm::vec3(0, 0, 0);
                 return;
             }
 
-            rotAxis = glm::normalize(glm::vec2(mouseDiff[1], mouseDiff[0]));
+            rotAxis = glm::normalize(glm::vec3(mouseDiff[1], mouseDiff[0], 0.f));
 
             rotSpeed = glm::length(mouseDiff) / 10;
             scene->rotateCamera(rotAxis, rotSpeed);
