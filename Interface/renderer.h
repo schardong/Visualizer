@@ -5,8 +5,32 @@
 
 class Renderer : public Scene
 {
-private:
+public:    
+    typedef enum
+    {
+        MIP,
+        AVG,
+        COM
+    } RAY_TRANSVERSAL;
 
+    Renderer(int w, int h);
+    virtual ~Renderer();
+
+    void init();
+    void destroy();
+    void update();
+    void render();
+    void resize(int, int);
+    void rotateCamera(glm::vec3, float);
+    void loadVolume(std::string);
+    void loadTransferFunction(std::string);
+    void setNumSamples(float);
+    float getNumSamples();
+    void setFovy(float);
+    float getFovy();
+    void setRayTransfersalMode(Renderer::RAY_TRANSVERSAL);
+
+private:
     typedef enum
     {
         FIRST,
@@ -16,6 +40,7 @@ private:
     GLuint fboId;
     GLuint fboTexId;
     GLuint depthBuffId;
+    Renderer::RAY_TRANSVERSAL mode;
 
     glm::vec4 eye;
     glm::mat4 projMatrix;
@@ -32,23 +57,6 @@ private:
 
     void loadUniforms(Renderer::SHADER_PASS);
     void checkUniforms(Renderer::SHADER_PASS);
-
-public:
-    Renderer(int w, int h);
-    virtual ~Renderer();
-
-    void init();
-    void destroy();
-    void update();
-    void render();
-    void resize(int, int);
-    void rotateCamera(glm::vec3, float);
-    void loadVolume(std::string);
-    void loadTransferFunction(std::string);
-    void setNumSamples(float);
-    float getNumSamples();
-    void setFovy(float);
-    float getFovy();
 };
 
 #endif // RENDERER_H

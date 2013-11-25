@@ -27,6 +27,7 @@ namespace Ui
         void loadTransferFuncion(std::string);
         void setNumSamples(float);
         float getNumSamples();
+        void setRayTransversalMode(Renderer::RAY_TRANSVERSAL);
 
     protected:
         void initializeGL();

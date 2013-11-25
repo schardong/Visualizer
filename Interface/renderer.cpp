@@ -22,6 +22,7 @@ Renderer::Renderer(int w, int h)
     fboId = fboTexId = depthBuffId = 0;
     fovy = 45;
     numSamples = 256.f;
+    mode = COM;
     vd = new ggraf::VolumeData("/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8", "/home/guilherme/Pictures/datasets/tff1.uint8");
 }
 
@@ -191,6 +192,7 @@ void Renderer::loadUniforms(Renderer::SHADER_PASS p)
 
             s->setUniformfv("u_vScreenSize", screenSize, 2);
             s->setUniform1f("u_fNumSamples", numSamples);
+            s->setUniform1i("rayTMode", mode);
         }
 
         s->setUniformMatrix("u_mProjectionMatrix", projMatrix);
@@ -245,4 +247,9 @@ void Renderer::setFovy(float n)
 float Renderer::getFovy()
 {
     return fovy;
+}
+
+void Renderer::setRayTransfersalMode(Renderer::RAY_TRANSVERSAL rtm)
+{
+    mode = rtm;
 }

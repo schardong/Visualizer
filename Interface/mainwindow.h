@@ -24,6 +24,9 @@ namespace Ui
         void loadTransferFunction();
         void quit();
 
+        void modeMIP();
+        void modeAVG();
+        void modeCOM();
 //        void increaseSamples();
 //        void decreaseSamples();
 
@@ -34,7 +37,12 @@ namespace Ui
         QAction* loadTFAction;
         QAction* quitAction;
 
+        QAction* mipAction;
+        QAction* avgAction;
+        QAction* comAction;
+
         QMenu* fileMenu;
+        QMenu* viewMenu;
 
         static const float STEP;
     };

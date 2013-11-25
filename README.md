@@ -7,6 +7,9 @@ TODO:
 -Extract all the uniforms from a shader and add its names and locations 
 to a std::map on the Shader class
 -Change all the glUniformNt to glProgramUniformNt 
+-Trilinear interpolation
+-Octree subdivision
+-Gradient estimation (Levoy paper)
 
 FIXME:
 -Adjust the rotation axis accordingly.

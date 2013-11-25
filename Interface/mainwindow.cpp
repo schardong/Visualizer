@@ -9,7 +9,6 @@
 namespace Ui
 {
 
-    const float MainWindow::STEP = 8;
 
     MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent)
@@ -23,13 +22,28 @@ namespace Ui
         quitAction = new QAction("Quit", this);
         connect(quitAction, SIGNAL(triggered()), this, SLOT(quit()));
 
+        mipAction = new QAction("Maximum Intensity Projection", this);
+        connect(mipAction, SIGNAL(triggered()), this, SLOT(modeMIP()));
+
+        avgAction = new QAction("Average Intensity Projection", this);
+        connect(avgAction, SIGNAL(triggered()), this, SLOT(modeAVG()));
+
+        comAction = new QAction("Composition Projection", this);
+        connect(comAction, SIGNAL(triggered()), this, SLOT(modeCOM()));
+
         fileMenu = new QMenu("File", this);
         fileMenu->addAction(loadVolAction);
         fileMenu->addAction(loadTFAction);
         fileMenu->addSeparator();
         fileMenu->addAction(quitAction);
 
+        viewMenu = new QMenu("View", this);
+        viewMenu->addAction(mipAction);
+        viewMenu->addAction(avgAction);
+        viewMenu->addAction(comAction);
+
         menuBar()->addMenu(fileMenu);
+        menuBar()->addMenu(viewMenu);
 
         resize(800, 600);
 
@@ -68,14 +82,19 @@ namespace Ui
         close();
     }
 
-//    void MainWindow::increaseSamples()
-//    {
-//        view->setNumSamples(view->getNumSamples() + STEP);
-//    }
+    void MainWindow::modeMIP()
+    {
+        view->setRayTransversalMode(Renderer::RAY_TRANSVERSAL::MIP);
+    }
 
-//    void MainWindow::decreaseSamples()
-//    {
-//        view->setNumSamples(view->getNumSamples() - STEP);
-//    }
+    void MainWindow::modeAVG()
+    {
+        view->setRayTransversalMode(Renderer::RAY_TRANSVERSAL::AVG);
+    }
+
+    void MainWindow::modeCOM()
+    {
+        view->setRayTransversalMode(Renderer::RAY_TRANSVERSAL::COM);
+    }
 
 }

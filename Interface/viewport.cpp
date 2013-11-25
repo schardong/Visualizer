@@ -26,7 +26,6 @@ namespace Ui
         rotSpeed = 0;
         mousePressLoc = glm::vec2(0, 0);
         rotAxis = glm::vec3(0, 0, 0);
-        showFullScreen();
     }
 
     Viewport::~Viewport()
@@ -58,6 +57,11 @@ namespace Ui
     float Viewport::getNumSamples()
     {
         return scene->getNumSamples();
+    }
+
+    void Viewport::setRayTransversalMode(Renderer::RAY_TRANSVERSAL rtm)
+    {
+        scene->setRayTransfersalMode(rtm);
     }
 
     void Viewport::initializeGL()
