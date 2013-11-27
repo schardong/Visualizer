@@ -45,7 +45,7 @@ namespace Ui
         menuBar()->addMenu(fileMenu);
         menuBar()->addMenu(viewMenu);
 
-        resize(800, 600);
+        resize(800, 800);
 
         QGLFormat f;
         f.setVersion(4, 2);

@@ -68,6 +68,11 @@ namespace ggraf
             exit(EXIT_FAILURE);
         }
 
+//        Prints the loaded transfer function.
+//        for(int i = 0; i < num_rgba; i+=4) {
+//            printf("i = %d - (%d, %d, %d, %d)\n", i/4, data[i], data[i+1], data[i+2], data[i+3]);
+//        }
+
         return data;
     }
 

@@ -124,7 +124,9 @@ void Renderer::update()
 
 void Renderer::render()
 {
-    if(vd->getDataTypes().first == vd->getDataTypes().second) {
+    if(mode == RAY_TRANSVERSAL::COM && vd->getDataTypes().first == vd->getDataTypes().second
+            || mode == RAY_TRANSVERSAL::AVG
+            || mode == RAY_TRANSVERSAL::MIP) {
         fPass->bind();
         glBindFramebuffer(GL_FRAMEBUFFER, fboId);
         glViewport(0, 0, width, height);

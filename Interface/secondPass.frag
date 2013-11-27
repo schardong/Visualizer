@@ -87,8 +87,9 @@ vec4 AVG(Ray ray, vec3 step)
         }
     }
 
-    return colorAcc.rrra / int(i);
-    return vec4(0.0);
+    colorAcc.rgb = colorAcc.rrr / i;
+
+    return colorAcc;
 }
 
 void main(void)
