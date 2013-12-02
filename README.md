@@ -12,7 +12,8 @@ to a std::map on the Shader class
 FUTURE_WORK:
 -Octree subdivision
 -Gradient estimation (Levoy paper)
--Trilinear interpolation
+-Trilinear interpolation of the data
+-Merge the matlab code with the Visualizer
 
 
 FIXME:
