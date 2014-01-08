@@ -60,13 +60,27 @@ size_t test_avg_importance(ctBranch* root_branch, double (*importance_measure)(c
     return larger;
 }
 
+ctBranch* myAlloc(void*)
+{
+    return (ctBranch*) calloc(1, sizeof(ctBranch));
+}
+
+void myFree(ctBranch* b, void*)
+{
+    free(b->data); b->data = NULL;
+    free(b); b = NULL;
+}
+
 double opacity_max = 0.9;
 
 int main(int argc, char** argv)
 {
 //    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
-    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
+//    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
 //    std::string path = "/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8";
+//    std::string path = "/home/netto/datasets/nucleon.41x41x41.uint8";
+    std::string path = "/home/netto/nucleon.41x41x41.uint8";
+
     char prefix[1024];
     bool compressed;
     Data data;
@@ -81,9 +95,14 @@ int main(int argc, char** argv)
     ct_arcMergeFunc(ctx, &arc_merge_proc);
     ct_priorityFunc(ctx, &arc_priority_proc);
 
+    ct_branchAllocator(ctx, &myAlloc, &myFree);
+
     ct_sweepAndMerge(ctx);
     ctBranch* root_branch = ct_decompose(ctx);
-    ctBranch** branch_map = ct_branchMap(ctx);;
+    ctBranch** branch_map = ct_branchMap(ctx);
+
+    if (root_branch == NULL)
+        cout << "FUCK" << endl;
 
     size_t max_depth = 0;
     calc_branch_depth(root_branch, &max_depth, 0);
@@ -98,7 +117,7 @@ int main(int argc, char** argv)
 
     cout << count_branches(root_branch) << " branches after simplification." << endl;
 
-//    cout << test_avg_importance(root_branch, &std_avg_importance, avg_importance / 10000) << " nodes are larger or equal than the threshold.\n";
+    cout << test_avg_importance(root_branch, &std_avg_importance, avg_importance / 10000) << " nodes are larger or equal than the threshold.\n";
     cout << "Average importance = " << avg_importance << endl;
 
     max_depth = 0;

@@ -106,12 +106,14 @@ bool Data::load(const char * file, char * prefix, bool * compressed) {
     gzFile zinfile;
 
 #if USE_ZLIB
+    std::clog << "Opening with zlib... ";
     zinfile = gzopen(file,"rb");
     if (!zinfile) {
         std::cerr << "could not open" << filename << std::endl;
         return false;
     }
 #else
+    std::clog << "Opening without zlib... ";
     infile.open(file,std::ios::in);
     if (!infile) {
         std::clog << "could not open " << filename << std::endl;
