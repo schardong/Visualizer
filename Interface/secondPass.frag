@@ -47,49 +47,44 @@ vec4 MIP(Ray ray, vec3 step)
 {
     float len = length(texture(u_sBackFaces, gl_FragCoord.st / u_vScreenSize).xyz - ex_vEntryPoint);
     vec3 currPos = ray.origin;
-    vec4 colorAcc = vec4(0.f);
+    float maxVal = 0.f;
     float lenAcc = 0.f;
 
     for(int i = 0; i < u_fNumSamples; i++, currPos += step, lenAcc += length(step)) {
-        vec4 colorSample = texture(u_sDensityMap, currPos);
+        float val = texture(u_sDensityMap, currPos).r;
+        float a = float(val > maxVal);
 
-        colorSample = abs(colorSample);
-        colorSample.a = clamp(colorSample.a, 0.f, 1.f);
+        maxVal = (1.f - a) * maxVal + val * a;
 
-        if(length(colorSample.rgb) > length(colorAcc.rgb)) {
-            colorAcc = colorSample;
-        }
         if(lenAcc >= len) {
             break;
         }
     }
 
-    return colorAcc.rrra;
+    return vec4(maxVal, maxVal, maxVal, 1.f);
 }
 
 vec4 AVG(Ray ray, vec3 step)
 {
     float len = length(texture(u_sBackFaces, gl_FragCoord.st / u_vScreenSize).xyz - ex_vEntryPoint);
     vec3 currPos = ray.origin;
-    vec4 colorAcc = vec4(0.f);
     float lenAcc = 0.f;
+    float accVal = 0.f;
     int i;
 
     for(i = 0; i < u_fNumSamples; i++, currPos += step, lenAcc += length(step)) {
-        vec4 colorSample = texture(u_sDensityMap, currPos);
+        float val = texture(u_sDensityMap, currPos).r;
 
-        colorSample = abs(colorSample);
-        colorSample.a = clamp(colorSample.a, 0.f, 1.f);
+        accVal += val;
 
-        colorAcc += colorSample;
         if(lenAcc >= len) {
             break;
         }
     }
 
-    colorAcc.rgb = colorAcc.rrr / i;
+    accVal /= i;
 
-    return colorAcc;
+    return vec4(accVal, accVal, accVal, 1.f);
 }
 
 void main(void)
