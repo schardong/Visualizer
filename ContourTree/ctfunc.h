@@ -17,6 +17,9 @@ void calc_branch_depth(ctBranch*, size_t*, size_t);
 void calc_branch_num_children(ctBranch*);
 //void calc_branch_features(ctBranch*, ctBranch**, Data*);
 
+//Functions - @Netto
+void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q);
+
 //Callback functions used on my implementation.
 double std_avg_importance(ctBranch*);
 double std_log_importance(ctBranch*);

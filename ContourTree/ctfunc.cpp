@@ -178,7 +178,7 @@ void calc_branch_num_children(ctBranch* root_branch)
         branch_queue.pop();
 
         if(curr_branch->data == NULL)
-            curr_branch->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));;
+            curr_branch->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));
 
         FeatureSet* branch_data = (FeatureSet*) curr_branch->data;
         for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
@@ -300,4 +300,49 @@ double arc_priority_proc(ctNode* leaf_node, void*)
     double arc_importance = sqrt(pow(hv * p, 2) + pow(v * p, 2) + pow(hv * v, 2));
     //std::cout << "Called arc_priority_proc " << leaf_node->i << "\t" << arc_importance << std::endl;
     return arc_importance;
+}
+
+/* ctOpFluid - @Netto */
+
+void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q)
+{
+    if(root_branch == NULL) return;
+
+    if(root_branch->data == NULL)
+        root_branch->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));
+
+    std::queue<ctBranch*> branch_queue;
+    branch_queue.push(root_branch);
+
+    //root node calcs
+    FeatureSet* branch_data = (FeatureSet*) root_branch->data;
+    branch_data->delta_h = (1.0*rate_Q*(((double)branch_data->p)/255.0))/(300.0*((double)branch_data->num_children));
+    branch_data->alpha_i = 0;
+    branch_data->delta_alpha_i = 0;
+    std::cout << branch_data->depth << " - " << branch_data->delta_h << ", ";
+
+
+    do {
+        ctBranch* curr_branch = branch_queue.front();
+        branch_queue.pop();
+
+        if(curr_branch->data == NULL) {
+            curr_branch->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));
+        }        
+
+        for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
+            FeatureSet* c_data = (FeatureSet*) c->data;
+            if(!c_data->remove) {
+                std::cout << c_data->depth << " - " << c_data->num_children << ", ";
+                if(c_data->num_children != 0) {
+                    c_data->delta_h = (1.0*rate_Q*(((double)c_data->p)/255.0))/(300.0*((double)c_data->num_children));
+                    c_data->alpha_i = 0;
+                    c_data->delta_alpha_i = 0;
+                    std::cout << c_data->depth << " - " << c_data->delta_h << ", ";
+                }
+                branch_queue.push(c);
+            }
+        }
+
+    } while(!branch_queue.empty());
 }
