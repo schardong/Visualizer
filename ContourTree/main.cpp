@@ -130,6 +130,7 @@ int main(int argc, char** argv)
     outputTree(std::cout, root_branch);
     cout << endl;
 
+    calc_gsd(root_branch, &data);
     calc_residue_flow(root_branch, opacity_max /(double)max_depth, 300.0);
 
     ct_cleanup(ctx);

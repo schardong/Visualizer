@@ -18,6 +18,8 @@ typedef struct
     double alpha_i; //initial alpha value (non leaf nodes)
     double alpha_i_j;
     double delta_alpha_i; //residue
+    double c_s_min; //children minimum saddle value
+    double c_s_max; //children maximum saddle value
 } FeatureSet;
 
 #endif // FEATURESET_H

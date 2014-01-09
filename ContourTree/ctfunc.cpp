@@ -155,7 +155,8 @@ void calc_branch_features(ctBranch* root_branch, ctBranch** b_map, Data* data)
     branch_data->v = f[0];
     branch_data->hv = f[1];
     branch_data->p = calc_persistence_branch(root_branch, data);
-
+    branch_data->c_s_min = 10000.0; //since maximum value is 255
+    branch_data->c_s_max = 0;
     free(f); f = NULL;
 
     for(ctBranch* c = root_branch->children.head; c!= NULL; c = c->nextChild) {
@@ -342,7 +343,9 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q)
                 branch_data->alpha_i = (alpha_d + parent_data->delta_alpha_i)*(1.0 - 0);
                 branch_data->delta_alpha_i = 0.0;
             }
-            std::cout << "["<< branch_data->depth << "] - " << branch_data->delta_h << " - " << branch_data->alpha_i << " - " << branch_data->delta_alpha_i << std::endl;
+            branch_data->alpha_i_j = branch_data->alpha_i*(0.5*(std_avg_importance(curr_branch)));
+            std::cout << "["<< branch_data->depth << "] - " << branch_data->delta_h << " - " << branch_data->alpha_i << " - "
+                      << branch_data->delta_alpha_i << " - " << branch_data->alpha_i_j << std::endl;
             //std::cout << branch_data->depth << " - " << branch_data->num_children << ", ";
         }
 
@@ -353,5 +356,43 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q)
             }
         }
 
+    } while(!branch_queue.empty());
+}
+
+void calc_saddle_min_max(ctBranch* root_branch, Data* data)
+{
+    if(root_branch == NULL) return;
+
+    if(root_branch->data == NULL)
+        root_branch->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));
+
+    std::queue<ctBranch*> branch_queue;
+    branch_queue.push(root_branch);
+
+    do {
+        ctBranch* curr_branch = branch_queue.front();
+        branch_queue.pop();
+
+        if(curr_branch->data == NULL)
+            curr_branch->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));
+
+        FeatureSet* branch_data = (FeatureSet*) curr_branch->data;
+        for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
+            FeatureSet* c_data = (FeatureSet*) c->data;
+            if(!c_data->remove) {
+                if(branch_data->num_children != 0) {
+                    if(data->data[c->saddle] < branch_data->c_s_min) {
+                        branch_data->c_s_min = data->data[c->saddle];
+                    }
+                    if (data->data[c->saddle] > branch_data->c_s_max){
+                        branch_data->c_s_max = data->data[c->saddle];
+                    }
+                }
+                branch_queue.push(c);
+            }
+        }
+        if(!branch_data->remove && branch_data->num_children != 0) {
+            std::cout << "nc: " << branch_data->num_children << " min: " << branch_data->c_s_min << " max: " << branch_data->c_s_max << std::endl;
+        }
     } while(!branch_queue.empty());
 }
