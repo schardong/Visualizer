@@ -37,7 +37,7 @@ header.path = ../include
 header.files = $$HEADERS
 #target.path = $$OUT_PWD
 
-INSTALLS +=  header
+INSTALLS += header
 
 #unix:!symbian {
 #    maemo5 {

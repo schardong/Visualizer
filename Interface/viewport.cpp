@@ -39,6 +39,7 @@ namespace Ui
     {
         timer->stop();
         scene->loadVolume(path);
+        //Montar contour tree aqui.
         timer->start(16);
     }
 
