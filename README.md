@@ -7,7 +7,9 @@ TODO:
 to a std::map on the Shader class
 -Change all the glUniformNt to glProgramUniformNt 
 -Extract all the uniforms from a shader and add its names and locations 
-
+-Integrate the ContourTree module into the Visualizer.
+-Adjust the transfer function sampling to sample multi-dimensional transfer 
+functions
 
 FUTURE_WORK:
 -Octree subdivision

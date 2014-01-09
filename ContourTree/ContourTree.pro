@@ -7,7 +7,8 @@ SOURCES += main.cpp \
     ctfunc.cpp \
     data.cpp \
     mesh.cpp \
-    simplification.cpp
+    simplification.cpp \
+    contourtree.cpp
 
 HEADERS += \
     ctfunc.h \
@@ -15,15 +16,21 @@ HEADERS += \
     featureset.h \
     global.h \
     simplification.h \
-    mesh.h
+    mesh.h \
+    contourtree.h
 
 QMAKE_CXXFLAGS += -std=c++11 -DUSE_ZLIB -MMD
 
+INCLUDEPATH += ../include
+
 LIBS += -lz
 LIBS += -ltourtre
+#LIBS += -L$$OUT_PWD/../Kernel -lKernel
 
 header.path = ../include
 header.files = $$HEADERS
+
+INSTALLS += header
 
 CONFIG(release, debug|release) {
     LIBS += -ltbb -ltbbmalloc_proxy

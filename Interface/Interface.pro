@@ -8,7 +8,7 @@ QT       += core gui opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -std=c++11 -MMD
 
 TARGET = Interface
 TEMPLATE = app
@@ -32,11 +32,24 @@ OTHER_FILES += \
 
 INCLUDEPATH += ../include
 
+LIBS += -L$$OUT_PWD/../Kernel -lKernel
+LIBS += -ldl
+
 config.path = $$OUT_PWD/
 config.files = $$OTHER_FILES
 
 INSTALLS += config
 
-LIBS += -L$$OUT_PWD/../Kernel -lKernel
+CONFIG(release, debug|release) {
+    QMAKE_CXXFLAGS += -g0 -O2
+    message(Release)
+    message($$QMAKE_CXXFLAGS)
+    message($$LIBS)
+}
 
-LIBS += -ldl
+CONFIG(debug, debug|release) {
+    QMAKE_CXXFLAGS += -g3 -pg -O0
+    message(Debug)
+    message($$QMAKE_CXXFLAGS)
+    message($$LIBS)
+}

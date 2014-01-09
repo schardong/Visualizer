@@ -108,8 +108,8 @@ void calc_branch_depth(ctBranch* b, size_t* max_depth, size_t depth)
 {
     if(b == NULL) return;
 
-    if(b->data == NULL)
-        b->data = (FeatureSet*) calloc(1,sizeof(FeatureSet));
+    if(b->data == NULL)        
+        b->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));
 
     FeatureSet* branch_data = (FeatureSet*) b->data;
     if(!branch_data->remove) {

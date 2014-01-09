@@ -8,7 +8,7 @@ QT       += opengl
 
 QT       -= core gui
 
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -std=c++11 -MMD
 
 TARGET = Kernel
 TEMPLATE = lib
@@ -35,15 +35,19 @@ INCLUDEPATH += ../include
 
 header.path = ../include
 header.files = $$HEADERS
-#target.path = $$OUT_PWD
 
-INSTALLS +=  header
+INSTALLS += header
 
-#unix:!symbian {
-#    maemo5 {
-#        target.path = /opt/usr/lib
-#    } else {
-#        target.path = /usr/lib
-#    }
-#    INSTALLS += target
-#}
+CONFIG(release, debug|release) {
+    QMAKE_CXXFLAGS += -g0 -O2
+    message(Release)
+    message($$QMAKE_CXXFLAGS)
+    message($$LIBS)
+}
+
+CONFIG(debug, debug|release) {
+    QMAKE_CXXFLAGS += -g3 -pg -O0
+    message(Debug)
+    message($$QMAKE_CXXFLAGS)
+    message($$LIBS)
+}
