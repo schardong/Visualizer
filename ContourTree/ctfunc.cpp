@@ -314,32 +314,41 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q)
     std::queue<ctBranch*> branch_queue;
     branch_queue.push(root_branch);
 
-    //root node calcs
-    FeatureSet* branch_data = (FeatureSet*) root_branch->data;
-    branch_data->delta_h = (1.0*rate_Q*(((double)branch_data->p)/255.0))/(300.0*((double)branch_data->num_children));
-    branch_data->alpha_i = 0;
-    branch_data->delta_alpha_i = 0;
-    std::cout << branch_data->depth << " - " << branch_data->delta_h << ", ";
-
-
     do {
-        ctBranch* curr_branch = branch_queue.front();
+        ctBranch* curr_branch = branch_queue.front();        
         branch_queue.pop();
 
         if(curr_branch->data == NULL) {
             curr_branch->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));
-        }        
+        }
+
+        FeatureSet* branch_data = (FeatureSet*) curr_branch->data;
+
+        if(!branch_data->remove) {
+            if (branch_data->num_children != 0) {
+                branch_data->delta_h = (1.0*rate_Q*(((double)branch_data->p)/255.0))/(300.0*((double)branch_data->num_children));
+                if(branch_data->depth == 0) { //root node calcs
+                    branch_data->alpha_i = alpha_d*(1-branch_data->delta_h);
+                    branch_data->delta_alpha_i = alpha_d - branch_data->alpha_i;
+                } else {
+                    ctBranch* parent_branch = curr_branch->parent;
+                    FeatureSet* parent_data = (FeatureSet*) parent_branch->data;
+                    branch_data->alpha_i = (alpha_d + parent_data->delta_alpha_i)*(1.0-branch_data->delta_h);
+                    branch_data->delta_alpha_i = (alpha_d + parent_data->delta_alpha_i)*branch_data->delta_h;
+                }
+            } else { // leaf node
+                ctBranch* parent_branch = curr_branch->parent;
+                FeatureSet* parent_data = (FeatureSet*) parent_branch->data;
+                branch_data->alpha_i = (alpha_d + parent_data->delta_alpha_i)*(1.0 - 0);
+                branch_data->delta_alpha_i = 0.0;
+            }
+            std::cout << "["<< branch_data->depth << "] - " << branch_data->delta_h << " - " << branch_data->alpha_i << " - " << branch_data->delta_alpha_i << std::endl;
+            //std::cout << branch_data->depth << " - " << branch_data->num_children << ", ";
+        }
 
         for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
             FeatureSet* c_data = (FeatureSet*) c->data;
-            if(!c_data->remove) {
-                std::cout << c_data->depth << " - " << c_data->num_children << ", ";
-                if(c_data->num_children != 0) {
-                    c_data->delta_h = (1.0*rate_Q*(((double)c_data->p)/255.0))/(300.0*((double)c_data->num_children));
-                    c_data->alpha_i = 0;
-                    c_data->delta_alpha_i = 0;
-                    std::cout << c_data->depth << " - " << c_data->delta_h << ", ";
-                }
+            if(!c_data->remove) {                
                 branch_queue.push(c);
             }
         }
