@@ -2,6 +2,7 @@
 #include "viewport.h"
 #include "scene.h"
 #include "renderer.h"
+#include "contourtree.h"
 
 #include <QTimer>
 #include <QKeyEvent>
@@ -39,7 +40,6 @@ namespace Ui
     {
         timer->stop();
         scene->loadVolume(path);
-        //Montar contour tree aqui.
         timer->start(16);
     }
 

@@ -75,10 +75,10 @@ double opacity_max = 0.9;
 
 int main(int argc, char** argv)
 {
-//    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
+    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
 //    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
 //    std::string path = "/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8";
-    std::string path = "/home/netto/datasets/nucleon.41x41x41.uint8";
+//    std::string path = "/home/netto/datasets/nucleon.41x41x41.uint8";
 //    std::string path = "/home/netto/nucleon.41x41x41.uint8";
 
     char prefix[1024];
