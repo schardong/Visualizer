@@ -25,7 +25,6 @@ INCLUDEPATH += ../include
 
 LIBS += -lz
 LIBS += -ltourtre
-#LIBS += -L$$OUT_PWD/../Kernel -lKernel
 
 header.path = ../include
 header.files = $$HEADERS
