@@ -6,9 +6,9 @@
 
 typedef struct
 {
-    double v;
-    double p;
-    double hv;
+    size_t v;
+    size_t p;
+    size_t hv;
     size_t depth;
     size_t num_children;
 //    if set to true, the branch is removed from the tree.
@@ -20,6 +20,10 @@ typedef struct
     double delta_alpha_i; //residue
     double c_s_min; //children minimum saddle value
     double c_s_max; //children maximum saddle value
+
+    double norm_v;
+    double norm_p;
+    double norm_hv;
 } FeatureSet;
 
 #endif // FEATURESET_H

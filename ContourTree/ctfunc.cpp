@@ -26,16 +26,16 @@ class VolHypervolAcc
     ctBranch* b;
     Data* data;
 public:
-    double v[2];
+    size_t v[2];
 
     VolHypervolAcc(ctBranch* _b, ctBranch** _b_map, Data* _data) : b_map(_b_map), b(_b), data(_data)
     {
-        v[0] = v[1] = 0.0;
+        v[0] = v[1] = 0;
     }
 
     VolHypervolAcc(VolHypervolAcc& rhs, tbb::split) : b_map(rhs.b_map), b(rhs.b), data(rhs.data)
     {
-        v[0] = v[1] = 0.0;
+        v[0] = v[1] = 0;
     }
 
     void operator()(const tbb::blocked_range<size_t>& r) {
@@ -44,7 +44,7 @@ public:
         for(size_t i = begin; i < end; i++) {
             if(b_map[i]->extremum == b->extremum && b_map[i]->saddle == b->saddle) {
                 v[0]++;
-                v[1] += (double) data->data[i];
+                v[1] += data->data[i];
             }
         }
     }
@@ -55,12 +55,12 @@ public:
     }
 };
 
-double* parallel_calc_vol_hypervol_branch(ctBranch* b, ctBranch** b_map, Data* data)
+size_t* parallel_calc_vol_hypervol_branch(ctBranch* b, ctBranch** b_map, Data* data)
 {
     VolHypervolAcc v(b, b_map, data);
-    double* fs = (double*) calloc(2, sizeof(double));
+    size_t* fs = (size_t*) calloc(2, sizeof(size_t));
     tbb::parallel_reduce(tbb::blocked_range<size_t>(0, data->totalSize), v);
-    std::memcpy(fs, v.v, 2 * sizeof(double));
+    std::memcpy(fs, v.v, 2 * sizeof(size_t));
     return fs;
 }
 
@@ -97,7 +97,7 @@ void calc_branch_features(ctBranch* root_branch, ctBranch** b_map, Data* data)
         root_branch->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));
 
     FeatureSet* branch_data = (FeatureSet*) root_branch->data;
-    double* f = parallel_calc_vol_hypervol_branch(root_branch, b_map, data);
+    size_t* f = parallel_calc_vol_hypervol_branch(root_branch, b_map, data);
     branch_data->v = f[0];
     branch_data->hv = f[1];
     branch_data->p = calc_persistence_branch(root_branch, data);
@@ -138,36 +138,24 @@ void calc_branch_num_children(ctBranch* root_branch)
     } while(!branch_queue.empty());
 }
 
-FeatureSet* find_max_features(ctBranch* root_branch)
+FeatureSet* find_max_features_children(ctBranch* root_branch)
 {
     FeatureSet* max_features = (FeatureSet*) calloc(1, sizeof(FeatureSet));
     if(root_branch == NULL) return max_features;
 
-    std::queue<ctBranch*> branch_queue;
-    branch_queue.push(root_branch);
+    for(ctBranch* c = root_branch->children.head; c != NULL; c = c->nextChild) {
+        FeatureSet* c_data = (FeatureSet*) c->data;
+        if(c_data->remove) continue;
 
-    do {
-        ctBranch* curr_branch = branch_queue.front();
-        branch_queue.pop();
+        if(c_data->v > max_features->v)
+            max_features->v = c_data->v;
 
-        FeatureSet* branch_data = (FeatureSet*) curr_branch->data;
+        if(c_data->hv > max_features->hv)
+            max_features->hv = c_data->hv;
 
-        if(branch_data->v > max_features->v)
-            max_features->v = branch_data->v;
-
-        if(branch_data->hv > max_features->hv)
-            max_features->hv = branch_data->hv;
-
-        if(branch_data->p > max_features->p)
-            max_features->p = branch_data->p;
-
-        for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
-            FeatureSet* c_data = (FeatureSet*) c->data;
-            if(!c_data->remove)
-                branch_queue.push(c);
-        }
-
-    } while(!branch_queue.empty());
+        if(c_data->p > max_features->p)
+            max_features->p = c_data->p;
+    }
 
     return max_features;
 }
@@ -175,33 +163,36 @@ FeatureSet* find_max_features(ctBranch* root_branch)
 void normalize_features(ctBranch* root_branch)
 {
     if(root_branch == NULL) return;
-    FeatureSet* max_features = find_max_features(root_branch);
-
-    std::cout << "normalize_features\n";
-    std::cout << "    " << max_features->v << ", " << max_features->hv << ", " << max_features->p << std::endl;
 
     std::queue<ctBranch*> branch_queue;
     branch_queue.push(root_branch);
+
+    FeatureSet* root_data = (FeatureSet*) root_branch->data;
+    root_data->norm_v = root_data->norm_p = root_data->norm_hv = 1.0;
 
     do {
         ctBranch* curr_branch = branch_queue.front();
         branch_queue.pop();
 
-        FeatureSet* branch_data = (FeatureSet*) curr_branch->data;
-        branch_data->v /= max_features->v;
-        branch_data->p /= max_features->p;
-        branch_data->hv /= max_features->hv;
+        FeatureSet* max_features = find_max_features_children(curr_branch);
 
         for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
             FeatureSet* c_data = (FeatureSet*) c->data;
-            if(!c_data->remove)
+            if(!c_data->remove) {
                 branch_queue.push(c);
+                c_data->norm_v = (double) c_data->v / max_features->v;
+                c_data->norm_p = (double) c_data->p / max_features->p;
+                c_data->norm_hv = (double) c_data->hv / max_features->hv;
+
+                std::cout << "    " << c_data->norm_v << ", " << c_data->norm_hv << ", " << c_data->norm_p << std::endl;
+            }
         }
+
+        free(max_features);
+        max_features = NULL;
 
     } while(!branch_queue.empty());
 
-    free(max_features);
-    max_features = NULL;
 }
 
 double calc_avg_importance(ctBranch* root_branch, double (*importance_measure)(ctBranch*))
