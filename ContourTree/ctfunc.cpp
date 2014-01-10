@@ -192,6 +192,69 @@ void calc_branch_num_children(ctBranch* root_branch)
     } while(!branch_queue.empty());
 }
 
+FeatureSet* find_max_features(ctBranch* root_branch)
+{
+    FeatureSet* max_features = (FeatureSet*) calloc(1, sizeof(FeatureSet));
+    if(root_branch == NULL) return max_features;
+
+    std::queue<ctBranch*> branch_queue;
+    branch_queue.push(root_branch);
+
+    do {
+        ctBranch* curr_branch = branch_queue.front();
+        branch_queue.pop();
+
+        FeatureSet* branch_data = (FeatureSet*) curr_branch->data;
+
+        if(branch_data->v > max_features->v)
+            max_features->v = branch_data->v;
+
+        if(branch_data->hv > max_features->hv)
+            max_features->hv = branch_data->hv;
+
+        if(branch_data->p > max_features->p)
+            max_features->p = branch_data->p;
+
+        for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
+            FeatureSet* c_data = (FeatureSet*) c->data;
+            if(!c_data->remove)
+                branch_queue.push(c);
+        }
+
+    } while(!branch_queue.empty());
+
+    return max_features;
+}
+
+void normalize_features(ctBranch* root_branch)
+{
+    if(root_branch == NULL) return;
+    FeatureSet* max_features = find_max_features(root_branch);
+
+    std::cout << "normalize_features\n";
+    std::cout << "    " << max_features->v << ", " << max_features->hv << ", " << max_features->p << std::endl;
+
+    std::queue<ctBranch*> branch_queue;
+    branch_queue.push(root_branch);
+
+    do {
+        ctBranch* curr_branch = branch_queue.front();
+        branch_queue.pop();
+
+        FeatureSet* branch_data = (FeatureSet*) curr_branch->data;
+
+        for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
+            FeatureSet* c_data = (FeatureSet*) c->data;
+            if(!c_data->remove)
+                branch_queue.push(c);
+        }
+
+    } while(!branch_queue.empty());
+
+    free(max_features);
+    max_features = NULL;
+}
+
 double calc_avg_importance(ctBranch* root_branch, double (*importance_measure)(ctBranch*))
 {
     if(root_branch == NULL) return 0.0;

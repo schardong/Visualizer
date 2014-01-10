@@ -15,7 +15,7 @@ void calc_branch_features(ctBranch*, ctBranch**, Data*);
 double calc_avg_importance(ctBranch*, double (*importance_measure)(ctBranch*));
 void calc_branch_depth(ctBranch*, size_t*, size_t);
 void calc_branch_num_children(ctBranch*);
-//void calc_branch_features(ctBranch*, ctBranch**, Data*);
+void normalize_features(ctBranch*);
 
 //Functions - @Netto
 void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q);
