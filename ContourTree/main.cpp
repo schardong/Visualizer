@@ -75,12 +75,11 @@ double opacity_max = 0.9;
 
 int main(int argc, char** argv)
 {
-//    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
+    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
 //    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
 //    std::string path = "/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8";
 
-    std::string path = "/home/netto/datasets/hydrogenAtom.128x128x128.uint8";
-
+//    std::string path = "/home/netto/datasets/hydrogenAtom.128x128x128.uint8";
 //    std::string path = "/home/netto/datasets/nucleon.41x41x41.uint8";
 //    std::string path = "/home/netto/nucleon.41x41x41.uint8";
 
@@ -126,11 +125,12 @@ int main(int argc, char** argv)
     max_depth = 0;
     calc_branch_depth(root_branch, &max_depth, 0);
     cout << "Tree depth = " << max_depth << "\nOpacity per depth level = " << opacity_max / max_depth << endl;
+    normalize_features(root_branch);
 
     outputTree(std::cout, root_branch);
     cout << endl;
 
-    calc_gsd(root_branch, &data);
+    //calc_gsd(root_branch, &data);
     calc_residue_flow(root_branch, opacity_max /(double)max_depth, 300.0);
 
     ct_cleanup(ctx);

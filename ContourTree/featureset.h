@@ -6,9 +6,9 @@
 
 typedef struct
 {
-    size_t v;
-    size_t p;
-    size_t hv;
+    double v;
+    double p;
+    double hv;
     size_t depth;
     size_t num_children;
 //    if set to true, the branch is removed from the tree.

@@ -20,57 +20,22 @@ size_t count_branches(ctBranch* b)
     return count;
 }
 
-//size_t calc_volume_branch(ctBranch* b, ctBranch** b_map, size_t num_vertices)
-//{
-//    size_t v = 0;
-
-//    for(size_t i = 0; i < num_vertices; i++)
-//        if(b_map[i]->extremum == b->extremum && b_map[i]->saddle == b->saddle)
-//            v++;
-
-//    return v;
-//}
-
-//size_t calc_hypervolume_branch(ctBranch* b, ctBranch** b_map, Data* data)
-//{
-//    size_t hv = 0;
-
-//    for(size_t i = 0; i < data->totalSize; i++)
-//        if(b_map[i]->extremum == b->extremum && b_map[i]->saddle == b->saddle)
-//            hv += data->data[i];
-
-//    return hv;
-//}
-
-size_t* calc_vol_hypervol_branch(ctBranch* b, ctBranch** b_map, Data* data)
-{
-    size_t* fs = (size_t*) calloc(2, sizeof(size_t));
-
-    for(size_t i = 0; i < data->totalSize; i++)
-        if(b_map[i]->extremum == b->extremum && b_map[i]->saddle == b->saddle) {
-            fs[0]++;
-            fs[1] += data->data[i];
-        }
-
-    return fs;
-}
-
 class VolHypervolAcc
 {
     ctBranch** b_map;
     ctBranch* b;
     Data* data;
 public:
-    size_t v[2];
+    double v[2];
 
     VolHypervolAcc(ctBranch* _b, ctBranch** _b_map, Data* _data) : b_map(_b_map), b(_b), data(_data)
     {
-        v[0] = v[1] = 0;
+        v[0] = v[1] = 0.0;
     }
 
     VolHypervolAcc(VolHypervolAcc& rhs, tbb::split) : b_map(rhs.b_map), b(rhs.b), data(rhs.data)
     {
-        v[0] = v[1] = 0;
+        v[0] = v[1] = 0.0;
     }
 
     void operator()(const tbb::blocked_range<size_t>& r) {
@@ -79,7 +44,7 @@ public:
         for(size_t i = begin; i < end; i++) {
             if(b_map[i]->extremum == b->extremum && b_map[i]->saddle == b->saddle) {
                 v[0]++;
-                v[1] += data->data[i];
+                v[1] += (double) data->data[i];
             }
         }
     }
@@ -90,12 +55,12 @@ public:
     }
 };
 
-size_t* parallel_calc_vol_hypervol_branch(ctBranch* b, ctBranch** b_map, Data* data)
+double* parallel_calc_vol_hypervol_branch(ctBranch* b, ctBranch** b_map, Data* data)
 {
     VolHypervolAcc v(b, b_map, data);
-    size_t* fs = (size_t*) calloc(2, sizeof(size_t));
+    double* fs = (double*) calloc(2, sizeof(double));
     tbb::parallel_reduce(tbb::blocked_range<size_t>(0, data->totalSize), v);
-    std::memcpy(fs, v.v, 2 * sizeof(size_t));
+    std::memcpy(fs, v.v, 2 * sizeof(double));
     return fs;
 }
 
@@ -124,25 +89,6 @@ void calc_branch_depth(ctBranch* b, size_t* max_depth, size_t depth)
         calc_branch_depth(c, max_depth, depth + 1);
 }
 
-//void calc_branch_features(ctBranch* root_branch, ctBranch** b_map, Data* data)
-//{
-//    if(root_branch == NULL) return;
-
-//    if(root_branch->data == NULL)
-//        root_branch->data = FeatureSet_new();
-
-//    FeatureSet* ptr = (FeatureSet*) root_branch->data;
-//    size_t* f = parallel_calc_vol_hypervol_branch(root_branch, b_map, data);//calc_vol_hypervol_branch(root_branch, b_map, data);
-//    ptr->v = f[0];//calc_volume_branch(root_branch, b_map, data->totalSize);
-//    ptr->p = calc_persistence_branch(root_branch, data);
-//    ptr->hv = f[1];//calc_hypervolume_branch(root_branch, b_map, data);
-//    free(f); f = NULL;
-
-//    for(ctBranch* c = root_branch->children.head; c!= NULL; c = c->nextChild) {
-//        calc_branch_features(c, b_map, data);
-//    }
-//}
-
 void calc_branch_features(ctBranch* root_branch, ctBranch** b_map, Data* data)
 {
     if(root_branch == NULL) return;
@@ -151,7 +97,7 @@ void calc_branch_features(ctBranch* root_branch, ctBranch** b_map, Data* data)
         root_branch->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));
 
     FeatureSet* branch_data = (FeatureSet*) root_branch->data;
-    size_t* f = parallel_calc_vol_hypervol_branch(root_branch, b_map, data);
+    double* f = parallel_calc_vol_hypervol_branch(root_branch, b_map, data);
     branch_data->v = f[0];
     branch_data->hv = f[1];
     branch_data->p = calc_persistence_branch(root_branch, data);
@@ -242,6 +188,9 @@ void normalize_features(ctBranch* root_branch)
         branch_queue.pop();
 
         FeatureSet* branch_data = (FeatureSet*) curr_branch->data;
+        branch_data->v /= max_features->v;
+        branch_data->p /= max_features->p;
+        branch_data->hv /= max_features->hv;
 
         for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
             FeatureSet* c_data = (FeatureSet*) c->data;
@@ -322,9 +271,9 @@ void vertex_proc(size_t v, ctArc* a, void* cb_data)
 
     Mesh* mesh_ptr = (Mesh*) cb_data;
     FeatureSet* data_a = (FeatureSet*) a->data;
-    data_a->v += 1;
-    data_a->hv += mesh_ptr->data[v];
-    data_a->p = std::abs(mesh_ptr->data[a->hi->i] - mesh_ptr->data[a->lo->i]);
+    data_a->v += 1.0;
+    data_a->hv += (double) mesh_ptr->data[v];
+    data_a->p = (double) std::abs(mesh_ptr->data[a->hi->i] - mesh_ptr->data[a->lo->i]);
 }
 
 void arc_merge_proc(ctArc* a, ctArc* b, void* cb_data)
@@ -348,21 +297,18 @@ void arc_merge_proc(ctArc* a, ctArc* b, void* cb_data)
         min_vertex_addr = a->lo->i;
 
     data_a->p = std::abs(mesh_ptr->data[max_vertex_addr] - mesh_ptr->data[min_vertex_addr]);
-    //FeatureSet_del((FeatureSet*) b->data);
     free((FeatureSet*) b->data);
     b->data = NULL;
-    //std::cout << "arc_merge_proc called\t" << data_a->v << "\t" << data_a->hv << "\t" << data_a->p << std::endl;
 }
 
 double arc_priority_proc(ctNode* leaf_node, void*)
 {
     ctArc* leaf_arc = ctNode_leafArc(leaf_node);
     FeatureSet* data_arc = (FeatureSet*) leaf_arc->data;
-    size_t v = data_arc->v;
-    size_t hv = data_arc->hv;
-    size_t p = data_arc->p;
+    double v = data_arc->v;
+    double hv = data_arc->hv;
+    double p = data_arc->p;
     double arc_importance = sqrt(pow(hv * p, 2) + pow(v * p, 2) + pow(hv * v, 2));
-    //std::cout << "Called arc_priority_proc " << leaf_node->i << "\t" << arc_importance << std::endl;
     return arc_importance;
 }
 
