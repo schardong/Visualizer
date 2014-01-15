@@ -305,7 +305,17 @@ double arc_priority_proc(ctNode* leaf_node, void*)
 
 /* ctOpFluid - @Netto */
 
-void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q)
+double half_std_avg_importance_normalized(ctBranch* b)
+{
+    if(b == NULL) return 0.0;
+
+    FeatureSet* ptr = (FeatureSet*) b->data;
+    if(ptr == NULL) return 0.0;
+
+    return 0.5*sqrt(pow(ptr->norm_hv * ptr->norm_p, 2) + pow(ptr->norm_v * ptr->norm_p, 2) + pow(ptr->norm_hv * ptr->norm_v, 2));
+}
+
+void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Data* data)
 {
     if(root_branch == NULL) return;
 
@@ -343,10 +353,13 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q)
                 branch_data->alpha_i = (alpha_d + parent_data->delta_alpha_i)*(1.0 - 0);
                 branch_data->delta_alpha_i = 0.0;
             }
-            branch_data->alpha_i_j = branch_data->alpha_i*(0.5*(std_avg_importance(curr_branch)));
-            std::cout << "["<< branch_data->depth << "] - " << branch_data->delta_h << " - " << branch_data->alpha_i << " - "
-                      << branch_data->delta_alpha_i << " - " << branch_data->alpha_i_j << std::endl;
+            branch_data->alpha_i_j = branch_data->alpha_i*(half_std_avg_importance_normalized(curr_branch))*calc_gsd(curr_branch,data);
+            std::cout << "["<< branch_data->depth << "] Dh: " << branch_data->delta_h << " Ai: " << branch_data->alpha_i << " r: "
+                      << branch_data->delta_alpha_i << " Aij: " << branch_data->alpha_i_j << std::endl;
             //std::cout << branch_data->depth << " - " << branch_data->num_children << ", ";
+            branch_data->alpha_lo = calc_alpha_sum(curr_branch);
+            branch_data->alpha_hi = calc_alpha_sum(curr_branch) + branch_data->alpha_i_j;            
+            std::cout << "     Alo: " << branch_data->alpha_lo << " Ahi: " << branch_data->alpha_hi << /* " Imp: " << std_avg_importance(curr_branch) << std::endl << */ std::endl;
         }
 
         for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
@@ -357,6 +370,27 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q)
         }
 
     } while(!branch_queue.empty());
+}
+
+double calc_gsd(ctBranch* b, Data* data) {
+    if(b->parent != NULL) {
+        FeatureSet* parent = (FeatureSet*) b->parent->data;
+        if(parent->num_children > 1)
+            return (((double)data->data[b->saddle]) - parent->c_s_min)/(parent->c_s_max - parent->c_s_min);
+    }
+    return 1.0;
+}
+
+double calc_alpha_sum(ctBranch* b) {
+    double sum = 0;
+    ctBranch* tmp = b->parent;
+    while (tmp != NULL) {
+        FeatureSet* parent = (FeatureSet*) tmp->data;
+        sum += parent->alpha_i_j;
+        free(parent);
+        tmp = tmp->parent;
+    }
+    return sum;
 }
 
 void calc_saddle_min_max(ctBranch* root_branch, Data* data)

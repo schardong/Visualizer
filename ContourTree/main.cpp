@@ -75,13 +75,13 @@ double opacity_max = 0.9;
 
 int main(int argc, char** argv)
 {
-    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
+//    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
 //    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
 //    std::string path = "/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8";
 
-//    std::string path = "/home/netto/datasets/hydrogenAtom.128x128x128.uint8";
+    std::string path = "/home/netto/datasets/hydrogenAtom.128x128x128.uint8";
 //    std::string path = "/home/netto/datasets/nucleon.41x41x41.uint8";
-//    std::string path = "/home/netto/nucleon.41x41x41.uint8";
+
 
     char prefix[1024];
     bool compressed;
@@ -131,7 +131,7 @@ int main(int argc, char** argv)
     cout << endl;
 
     //calc_gsd(root_branch, &data);
-    calc_residue_flow(root_branch, opacity_max /(double)max_depth, 300.0);
+    calc_residue_flow(root_branch, opacity_max /(double)max_depth, 300.0, &data);
 
     ct_cleanup(ctx);
     free(root_branch);

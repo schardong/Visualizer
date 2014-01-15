@@ -18,8 +18,11 @@ void calc_branch_num_children(ctBranch*);
 void normalize_features(ctBranch*);
 
 //Functions - @Netto
-void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q);
+void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Data* data);
 void calc_saddle_min_max(ctBranch* root_branch, Data* data);
+double calc_gsd(ctBranch* b, Data* data);
+double half_std_avg_importance_normalized(ctBranch*);
+double calc_alpha_sum(ctBranch* b);
 
 //Callback functions used on my implementation.
 double std_avg_importance(ctBranch*);
