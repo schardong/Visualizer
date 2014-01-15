@@ -32,11 +32,41 @@ namespace ggraf
         void* voxels = calloc(num_voxels, bytes_per_pixel);
         size_t bytes_read = fread(voxels, bytes_per_pixel, num_voxels, fp);
         fclose(fp);
-        fp = NULL;
+        fp = nullptr;
 
         if(bytes_read != num_voxels) {
             free(voxels);
-            voxels = NULL;
+            voxels = nullptr;
+            exit(EXIT_FAILURE);
+        }
+
+        return voxels;
+    }
+
+    void* ResourceManager::loadVertexToBranchMap(std::string filename, int w, int h, int slices)
+    {
+        FILE* fp;
+        size_t num_voxels = w * h * slices;
+
+        Logger::getInstance()->log("ggraf::ResourceManager::loadVertexToBranchMap(" +
+                                   filename + " " +
+                                   std::to_string(w) + " " +
+                                   std::to_string(h) + " " +
+                                   std::to_string(slices) + ")");
+
+        if(!(fp = fopen(filename.c_str(), "rb"))) {
+            Logger::getInstance()->error("Failed to open the file " + filename);
+            exit(EXIT_FAILURE);
+        }
+
+        void* voxels = calloc(num_voxels, sizeof(unsigned int));
+        size_t bytes_read = fread(voxels, sizeof(unsigned int), num_voxels, fp);
+        fclose(fp);
+        fp = nullptr;
+
+        if(bytes_read != num_voxels) {
+            free(voxels);
+            voxels = nullptr;
             exit(EXIT_FAILURE);
         }
 
