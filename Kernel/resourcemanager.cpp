@@ -12,98 +12,149 @@ using std::endl;
 
 namespace ggraf
 {
-    void* ResourceManager::loadVolumeData(std::string filename, int w, int h, int slices, size_t bytes_per_pixel)
+
+    static void* loadRawFile(std::string filename, size_t num_elements, size_t bytes_per_element)
     {
         FILE* fp;
-        size_t num_voxels = w * h * slices;
-
-        Logger::getInstance()->log("ggraf::ResourceManager::loadVolumeData(" +
-                                   filename + " " +
-                                   std::to_string(w) + " " +
-                                   std::to_string(h) + " " +
-                                   std::to_string(slices) + " " +
-                                   std::to_string(bytes_per_pixel) + ")");
+        Logger::getInstance()->log("ggraf::ResourceManager::loadRawFile(" +
+                                   filename + ", " +
+                                   std::to_string(num_elements) + ", " +
+                                   std::to_string(bytes_per_element) + ")");
 
         if(!(fp = fopen(filename.c_str(), "rb"))) {
             Logger::getInstance()->error("Failed to open the file " + filename);
-            exit(EXIT_FAILURE);
+            return nullptr;
         }
 
-        void* voxels = calloc(num_voxels, bytes_per_pixel);
-        size_t bytes_read = fread(voxels, bytes_per_pixel, num_voxels, fp);
+        void* contents = calloc(num_elements, bytes_per_element);
+        size_t bytes_read = fread(contents, bytes_per_element, num_elements, fp);
         fclose(fp);
         fp = nullptr;
 
-        if(bytes_read != num_voxels) {
-            free(voxels);
-            voxels = nullptr;
-            exit(EXIT_FAILURE);
+        if(bytes_read != num_elements) {
+            free(contents);
+            contents = nullptr;
         }
 
-        return voxels;
+        return contents;
+
+    }
+
+    void* ResourceManager::loadVolumeData(std::string filename, int w, int h, int slices, size_t bytes_per_pixel)
+    {
+//        FILE* fp;
+        size_t num_voxels = w * h * slices;
+
+        Logger::getInstance()->log("ggraf::ResourceManager::loadVolumeData(" +
+                                   filename + ", " +
+                                   std::to_string(w) + ", " +
+                                   std::to_string(h) + ", " +
+                                   std::to_string(slices) + ", " +
+                                   std::to_string(bytes_per_pixel) + ")");
+
+        return loadRawFile(filename, num_voxels, bytes_per_pixel);
+
+//        if(!(fp = fopen(filename.c_str(), "rb"))) {
+//            Logger::getInstance()->error("Failed to open the file " + filename);
+//            exit(EXIT_FAILURE);
+//        }
+
+//        void* voxels = calloc(num_voxels, bytes_per_pixel);
+//        size_t bytes_read = fread(voxels, bytes_per_pixel, num_voxels, fp);
+//        fclose(fp);
+//        fp = nullptr;
+
+//        if(bytes_read != num_voxels) {
+//            free(voxels);
+//            voxels = nullptr;
+//            exit(EXIT_FAILURE);
+//        }
+
+//        return voxels;
     }
 
     void* ResourceManager::loadVertexToBranchMap(std::string filename, int w, int h, int slices)
     {
-        FILE* fp;
+//        FILE* fp;
         size_t num_voxels = w * h * slices;
 
         Logger::getInstance()->log("ggraf::ResourceManager::loadVertexToBranchMap(" +
-                                   filename + " " +
-                                   std::to_string(w) + " " +
-                                   std::to_string(h) + " " +
+                                   filename + ", " +
+                                   std::to_string(w) + ", " +
+                                   std::to_string(h) + ", " +
                                    std::to_string(slices) + ")");
 
-        if(!(fp = fopen(filename.c_str(), "rb"))) {
-            Logger::getInstance()->error("Failed to open the file " + filename);
-            exit(EXIT_FAILURE);
-        }
+        return loadRawFile(filename, num_voxels, sizeof(unsigned int));
 
-        void* voxels = calloc(num_voxels, sizeof(unsigned int));
-        size_t bytes_read = fread(voxels, sizeof(unsigned int), num_voxels, fp);
-        fclose(fp);
-        fp = nullptr;
+//        if(!(fp = fopen(filename.c_str(), "rb"))) {
+//            Logger::getInstance()->error("Failed to open the file " + filename);
+//            exit(EXIT_FAILURE);
+//        }
 
-        if(bytes_read != num_voxels) {
-            free(voxels);
-            voxels = nullptr;
-            exit(EXIT_FAILURE);
-        }
+//        void* voxels = calloc(num_voxels, sizeof(unsigned int));
+//        size_t bytes_read = fread(voxels, sizeof(unsigned int), num_voxels, fp);
+//        fclose(fp);
+//        fp = nullptr;
 
-        return voxels;
+//        if(bytes_read != num_voxels) {
+//            free(voxels);
+//            voxels = nullptr;
+//            exit(EXIT_FAILURE);
+//        }
+
+//        return voxels;
     }
 
     unsigned char* ResourceManager::loadTransferFuncion(std::string filename, size_t bytes_per_pixel)
     {
-        FILE* fp;
-        size_t num_rgba = bytes_per_pixel == sizeof(unsigned short) ? 4096 * 4 : 256 * 4;
+//        FILE* fp;
+        size_t num_rgba = bytes_per_pixel == sizeof(unsigned short) ? 4096 * 4 :
+                                                                      256 * 4;
 
         Logger::getInstance()->log("ggraf::ResourceManager::loadTransferFuncion(" +
-                                   filename + " " +
+                                   filename + ", " +
                                    std::to_string(bytes_per_pixel) + ")");
 
-        if(!(fp = fopen(filename.c_str(), "rb"))) {
-            Logger::getInstance()->error("Failed to open the file " + filename);
-            exit(EXIT_FAILURE);
-        }
+        return (unsigned char*) loadRawFile(filename, num_rgba, 1);
 
-        unsigned char* data = (unsigned char*) calloc(num_rgba, sizeof(unsigned char));
-        size_t bytes_read = fread(data, sizeof(unsigned char), num_rgba, fp);
-        fclose(fp);
-        fp = NULL;
-
-        if(bytes_read != num_rgba) {
-            free(data);
-            data = NULL;
-            exit(EXIT_FAILURE);
-        }
-
-//        Prints the loaded transfer function.
-//        for(int i = 0; i < num_rgba; i+=4) {
-//            printf("i = %d - (%d, %d, %d, %d)\n", i/4, data[i], data[i+1], data[i+2], data[i+3]);
+//        if(!(fp = fopen(filename.c_str(), "rb"))) {
+//            Logger::getInstance()->error("Failed to open the file " + filename);
+//            exit(EXIT_FAILURE);
 //        }
 
-        return data;
+//        unsigned char* data = (unsigned char*) calloc(num_rgba, sizeof(unsigned char));
+//        size_t bytes_read = fread(data, sizeof(unsigned char), num_rgba, fp);
+//        fclose(fp);
+//        fp = NULL;
+
+//        if(bytes_read != num_rgba) {
+//            free(data);
+//            data = NULL;
+//            exit(EXIT_FAILURE);
+//        }
+
+////        Prints the loaded transfer function.
+////        for(int i = 0; i < num_rgba; i+=4) {
+////            printf("i = %d - (%d, %d, %d, %d)\n", i/4, data[i], data[i+1], data[i+2], data[i+3]);
+////        }
+
+//        return data;
+    }
+
+    unsigned char* loadMultiDimensionalTransferFunction(std::string filename, int w, int h, size_t bytes_per_pixel)
+    {
+        size_t num_pixels = w * h;
+        size_t num_rgba = bytes_per_pixel == sizeof(unsigned short) ? num_pixels * sizeof(unsigned short) * 4 :
+                                                                      num_pixels * sizeof(unsigned char) * 4;
+
+        Logger::getInstance()->log("ggraf::ResourceManager::loadMultiDimensionalTranferFunction(" +
+                                   filename + ", " +
+                                   std::to_string(w) + ", " +
+                                   std::to_string(h) + ", " +
+                                   std::to_string(bytes_per_pixel) + ")");
+
+        return (unsigned char*) loadRawFile(filename, num_rgba, 1);
+
     }
 
     GLuint ResourceManager::createVolumeTex(int w, int h, int slices, size_t bytes_per_pixel, void* data)
