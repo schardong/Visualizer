@@ -19,6 +19,7 @@ namespace ggraf
         void* loadVolumeData(std::string filename, int w, int h, int slices, size_t bytes_per_pixel);
         void* loadVertexToBranchMap(std::string filename, int w, int h, int slices);
         unsigned char* loadTransferFuncion(std::string filename, size_t bytes_per_pixel);
+        unsigned char* loadMultiDimensionalTransferFunction(std::string filename, int width, int height, size_t bytes_per_pixel);
 
         GLuint createVolumeTex(int w, int h, int slices, size_t bytes_per_pixel, void* data);
         GLuint createTransferFuncTex(size_t bytes_per_pixel, unsigned char* data);
