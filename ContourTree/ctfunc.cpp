@@ -359,7 +359,7 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Dat
             //std::cout << branch_data->depth << " - " << branch_data->num_children << ", ";
             branch_data->alpha_lo = calc_alpha_sum(curr_branch);
             branch_data->alpha_hi = calc_alpha_sum(curr_branch) + branch_data->alpha_i_j;            
-            std::cout << "     Alo: " << branch_data->alpha_lo << " Ahi: " << branch_data->alpha_hi << /* " Imp: " << std_avg_importance(curr_branch) << std::endl << */ std::endl;
+            std::cout << "     Alo: " << branch_data->alpha_lo << " Ahi: " << branch_data->alpha_hi <<  " Imp: " << std_avg_importance(curr_branch) << std::endl <<  std::endl;
         }
 
         for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
