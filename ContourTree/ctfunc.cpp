@@ -359,9 +359,13 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Dat
             //std::cout << branch_data->depth << " - " << branch_data->num_children << ", ";
             branch_data->alpha_lo = calc_alpha_sum(curr_branch);
             branch_data->alpha_hi = calc_alpha_sum(curr_branch) + branch_data->alpha_i_j;
-            branch_data->alpha = calc_final_alpha(curr_branch, data);
+            branch_data->alpha = calc_final_alpha(curr_branch,LINEAR, data);
             std::cout << "     Alo: " << branch_data->alpha_lo << " Ahi: " << branch_data->alpha_hi << /* " Imp: " << std_avg_importance(curr_branch) << */ std::endl;
-            std::cout << " Opacity: " << branch_data->alpha << std::endl << std::endl;
+            std::cout << " Opacity: ";
+            for(int i = 0; i < 256; i++)
+                std::cout << branch_data->alpha[i] << " ";
+            std::cout << "\n\n";
+
         }
 
         for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
@@ -374,31 +378,43 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Dat
     } while(!branch_queue.empty());
 }
 
-double calc_final_alpha(ctBranch* b, Data* data) { //hat like
-    FeatureSet* b_data = (FeatureSet*) b->data;
-    double delS = 255.0;
-    if(b->parent != NULL) {
-        FeatureSet* par_data = (FeatureSet*) b->parent->data;
-        delS = par_data->c_s_max - par_data->c_s_min;
-    }
+double* calc_final_alpha(ctBranch* b, TFShape shape, Data* data)
+{
+    if(b == NULL) return nullptr;
+    double* alpha_tf = (double*) calloc(256, sizeof(double));
 
-    double delAlpha = (b_data->alpha_hi - b_data->alpha_lo);
-    if(delAlpha < 0.01) {
-        return b_data->alpha_lo;
+    FeatureSet* b_data = (FeatureSet*) b->data;
+
+    switch(shape) {
+    case HAT:
+        std::cout << "HAT shape chosen.\n";
+        break;
+    case TRIANGLE:
+        std::cout << "TRIANGLE shape chosen.\n";
+        break;
+    case TRAPEZOID:
+        std::cout << "TRAPEZOID shape chosen.\n";
+        break;
+    case HTRAPEZOID:
+        std::cout << "HTRAPEZOID shape chosen.\n";
+        break;
+    case LINEAR:
+    default:
+        std::cout << "LINEAR shape chosen.\n";
+        double m = (1 - 0) / (b_data->alpha_hi - b_data->alpha_lo);
+
+        double step = (b_data->alpha_hi - b_data->alpha_lo) / 256.0;
+        double x = b_data->alpha_lo;
+
+        std::cout << "m = " << m << std::endl;
+        std::cout << "step = " << step << std::endl;
+        std::cout << "x = " << x << std::endl;
+
+        for(int i = 0; i < 256 && x <= b_data->alpha_hi; i++, x += step)
+            alpha_tf[i] = m * (x - b_data->alpha_lo);
+        break;
     }
-    double a = delAlpha/delS; // (255*0.5 - 255*0.33) = 43.35
-    double s = ((double) data->data[b->saddle]);
-    std::cout << "saddle: " << s << std::endl;
-    if (s < delS*0.33) {
-        return b_data->alpha_lo;
-    } else if (s > delS*0.66) {
-        return b_data->alpha_lo;
-    } else if (s < delS*0.5){
-        return ((double) data->data[b->saddle])*a;
-    } else {
-        return -((double) data->data[b->saddle])*a;
-    }
-    return -1.0;
+    return alpha_tf;
 }
 
 double calc_gsd(ctBranch* b, Data* data) {

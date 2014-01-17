@@ -14,7 +14,7 @@ typedef struct
 
     bool remove; //if set to true, the branch is removed from the tree.
     double delta_h; // (non leaf nodes)
-    double alpha; //final alpha value
+    double* alpha; //opacity transfer function.
     double alpha_i; //initial alpha value (non leaf nodes)
     double alpha_i_j; //
     double alpha_lo; //final lower opacity value band

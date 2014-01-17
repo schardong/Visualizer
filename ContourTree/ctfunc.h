@@ -10,6 +10,15 @@ extern "C"
 #include <tourtre/tourtre.h>
 }
 
+typedef enum
+{
+    LINEAR,     // y = ax.
+    HAT,        //0.45 to 0.55 is different than 0. Max at 0.5.
+    TRIANGLE,   //Max at 0.5
+    TRAPEZOID,  //Growth until 0.45. Max value to the end.
+    HTRAPEZOID  //Half trapezoid
+} TFShape;
+
 size_t count_branches(ctBranch*);
 void calc_branch_features(ctBranch*, ctBranch**, Data*);
 double calc_avg_importance(ctBranch*, double (*importance_measure)(ctBranch*));
@@ -23,7 +32,7 @@ void calc_saddle_min_max(ctBranch* root_branch, Data* data);
 double calc_gsd(ctBranch* b, Data* data);
 double half_std_avg_importance_normalized(ctBranch*);
 double calc_alpha_sum(ctBranch* b);
-double calc_final_alpha(ctBranch* b, Data* data);
+double* calc_final_alpha(ctBranch* b, TFShape shape, Data* data);
 
 //Callback functions used on my implementation.
 double std_avg_importance(ctBranch*);
