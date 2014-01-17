@@ -358,8 +358,12 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Dat
                       << branch_data->delta_alpha_i << " Aij: " << branch_data->alpha_i_j << std::endl;
             //std::cout << branch_data->depth << " - " << branch_data->num_children << ", ";
             branch_data->alpha_lo = calc_alpha_sum(curr_branch);
-            branch_data->alpha_hi = calc_alpha_sum(curr_branch) + branch_data->alpha_i_j;            
-            std::cout << "     Alo: " << branch_data->alpha_lo << " Ahi: " << branch_data->alpha_hi <<  " Imp: " << std_avg_importance(curr_branch) << std::endl <<  std::endl;
+
+            branch_data->alpha_hi = calc_alpha_sum(curr_branch) + branch_data->alpha_i_j;
+            branch_data->alpha = calc_final_alpha(curr_branch, data);
+            std::cout << "     Alo: " << branch_data->alpha_lo << " Ahi: " << branch_data->alpha_hi << /* " Imp: " << std_avg_importance(curr_branch) << */ std::endl;
+            std::cout << " Opacity: " << branch_data->alpha << std::endl << std::endl;
+
         }
 
         for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
@@ -370,6 +374,33 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Dat
         }
 
     } while(!branch_queue.empty());
+}
+
+double calc_final_alpha(ctBranch* b, Data* data) { //hat like
+    FeatureSet* b_data = (FeatureSet*) b->data;
+    double delS = 255.0;
+    if(b->parent != NULL) {
+        FeatureSet* par_data = (FeatureSet*) b->parent->data;
+        delS = par_data->c_s_max - par_data->c_s_min;
+    }
+
+    double delAlpha = (b_data->alpha_hi - b_data->alpha_lo);
+    if(delAlpha < 0.01) {
+        return b_data->alpha_lo;
+    }
+    double a = delAlpha/delS; // (255*0.5 - 255*0.33) = 43.35
+    double s = ((double) data->data[b->saddle]);
+    std::cout << "saddle: " << s << std::endl;
+    if (s < delS*0.33) {
+        return b_data->alpha_lo;
+    } else if (s > delS*0.66) {
+        return b_data->alpha_lo;
+    } else if (s < delS*0.5){
+        return ((double) data->data[b->saddle])*a;
+    } else {
+        return -((double) data->data[b->saddle])*a;
+    }
+    return -1.0;
 }
 
 double calc_gsd(ctBranch* b, Data* data) {
