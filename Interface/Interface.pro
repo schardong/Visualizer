@@ -28,7 +28,8 @@ OTHER_FILES += \
     secondPass.vert \
     secondPass.frag \
     firstPass.vert \
-    firstPass.frag
+    firstPass.frag \
+    secondPassMultiTf.frag
 
 INCLUDEPATH += ../include
 
