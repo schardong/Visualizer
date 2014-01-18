@@ -89,24 +89,40 @@ void calc_branch_depth(ctBranch* b, size_t* max_depth, size_t depth)
 
 void calc_branch_features(ctBranch* root_branch, ctBranch** b_map, Data* data)
 {
-    if(root_branch == NULL) return;
 
-    if(root_branch->data == NULL)
-        root_branch->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));
+    if(b_map == NULL) return;
 
-    FeatureSet* branch_data = (FeatureSet*) root_branch->data;
-    size_t* f = parallel_calc_vol_hypervol_branch(root_branch, b_map, data);
+    for(int i = 0; i < data->totalSize; i++) {
+        if(b_map[i]->data == NULL)
+            b_map[i]->data = calloc(sizeof(FeatureSet*), 1);
 
-    branch_data->v = f[0];
-    branch_data->hv = f[1];
-    branch_data->p = calc_persistence_branch(root_branch, data);
-    branch_data->c_s_min = 10000.0; //since maximum value is 255
-    branch_data->c_s_max = 0;
-    free(f); f = NULL;
+        FeatureSet* branch_data = (FeatureSet*) b_map[i]->data;
+        branch_data->v++;
+        branch_data->hv += data->data[i];
+        branch_data->p = std::abs(data->data[b_map[i]->extremum] - data->data[b_map[i]->saddle]);
 
-    for(ctBranch* c = root_branch->children.head; c!= NULL; c = c->nextChild) {
-        calc_branch_features(c, b_map, data);
+        branch_data->c_s_min = 10000.0; //since maximum value is 255
+        branch_data->c_s_max = 0;
     }
+
+//    if(root_branch == NULL) return;
+
+//    if(root_branch->data == NULL)
+//        root_branch->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));
+
+//    FeatureSet* branch_data = (FeatureSet*) root_branch->data;
+//    size_t* f = parallel_calc_vol_hypervol_branch(root_branch, b_map, data);
+
+//    branch_data->v = f[0];
+//    branch_data->hv = f[1];
+//    branch_data->p = calc_persistence_branch(root_branch, data);
+//    branch_data->c_s_min = 10000.0; //since maximum value is 255
+//    branch_data->c_s_max = 0;
+//    free(f); f = NULL;
+
+//    for(ctBranch* c = root_branch->children.head; c!= NULL; c = c->nextChild) {
+//        calc_branch_features(c, b_map, data);
+//    }
 }
 
 void calc_branch_num_children(ctBranch* root_branch)
@@ -431,7 +447,7 @@ double calc_alpha_sum(ctBranch* b) {
     while (tmp != NULL) {
         FeatureSet* parent = (FeatureSet*) tmp->data;
         sum += parent->alpha_i_j;
-        free(parent);
+        //free(parent);
         tmp = tmp->parent;
     }
     return sum;

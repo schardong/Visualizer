@@ -88,8 +88,8 @@ double opacity_max = 0.9;
 int main(int argc, char** argv)
 {
 //    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
-    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
-//    std::string path = "/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8";
+//    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
+    std::string path = "/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8";
 
 //    std::string path = "/home/netto/datasets/hydrogenAtom.128x128x128.uint8";
 //    std::string path = "/home/netto/datasets/nucleon.41x41x41.uint8";
@@ -145,7 +145,10 @@ int main(int argc, char** argv)
     cout << "Tree depth = " << max_depth << "\nOpacity per depth level = " << opacity_max / max_depth << endl;
     normalize_features(root_branch);
 
-    outputTree(std::cout, root_branch);
+    std::ofstream out_file;
+    out_file.open("/home/guilherme/new_non_dumb_way.txt");
+    outputTree(out_file, root_branch);
+    out_file.close();
     cout << endl;
 
     //calc_gsd(root_branch, &data);
