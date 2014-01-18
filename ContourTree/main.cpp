@@ -71,15 +71,27 @@ void myFree(ctBranch* b, void*)
     free(b); b = NULL;
 }
 
+void calcStuff(ctBranch** b_map, Data* data) {
+
+    for(int i = 0; i < data->totalSize; i++) {
+        if(b_map[i]->data == NULL) b_map[i]->data = calloc(sizeof(FeatureSet*), 1);
+        FeatureSet* bdata = (FeatureSet*) b_map[i]->data;
+        bdata->v++;
+        bdata->hv += data->data[i];
+        bdata->p = std::abs(data->data[b_map[i]->extremum] - data->data[b_map[i]->saddle]);
+    }
+
+}
+
 double opacity_max = 0.9;
 
 int main(int argc, char** argv)
 {
 //    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
-//    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
+    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
 //    std::string path = "/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8";
 
-    std::string path = "/home/netto/datasets/hydrogenAtom.128x128x128.uint8";
+//    std::string path = "/home/netto/datasets/hydrogenAtom.128x128x128.uint8";
 //    std::string path = "/home/netto/datasets/nucleon.41x41x41.uint8";
 
 
@@ -102,6 +114,12 @@ int main(int argc, char** argv)
     ct_sweepAndMerge(ctx);
     ctBranch* root_branch = ct_decompose(ctx);
     ctBranch** branch_map = ct_branchMap(ctx);
+
+//    tbb::tick_count a = tbb::tick_count::now();
+//    calcStuff(branch_map, &data);
+//    tbb::tick_count b = tbb::tick_count::now();
+
+//    cout << (b - a).seconds() << " seconds\n";
 
     if (root_branch == NULL)
         cout << "FUCK" << endl;

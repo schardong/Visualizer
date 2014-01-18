@@ -81,8 +81,6 @@ void calc_branch_depth(ctBranch* b, size_t* max_depth, size_t depth)
         branch_data->depth = depth;
         if(depth > *max_depth)
             *max_depth = depth;
-    } else {
-        //std::cout << "True ";
     }
 
     for(ctBranch* c = b->children.head; c != NULL; c = c->nextChild)
@@ -98,6 +96,7 @@ void calc_branch_features(ctBranch* root_branch, ctBranch** b_map, Data* data)
 
     FeatureSet* branch_data = (FeatureSet*) root_branch->data;
     size_t* f = parallel_calc_vol_hypervol_branch(root_branch, b_map, data);
+
     branch_data->v = f[0];
     branch_data->hv = f[1];
     branch_data->p = calc_persistence_branch(root_branch, data);
