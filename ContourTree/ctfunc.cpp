@@ -89,17 +89,16 @@ void calc_branch_depth(ctBranch* b, size_t* max_depth, size_t depth)
 
 void calc_branch_features(ctBranch* root_branch, ctBranch** b_map, Data* data)
 {
-
     if(b_map == NULL) return;
 
-    for(int i = 0; i < data->totalSize; i++) {
+    for(size_t i = 0; i < data->totalSize; i++) {
         if(b_map[i]->data == NULL)
-            b_map[i]->data = calloc(sizeof(FeatureSet*), 1);
+            b_map[i]->data = calloc(1, sizeof(FeatureSet));
 
         FeatureSet* branch_data = (FeatureSet*) b_map[i]->data;
         branch_data->v++;
         branch_data->hv += data->data[i];
-        branch_data->p = std::abs(data->data[b_map[i]->extremum] - data->data[b_map[i]->saddle]);
+        branch_data->p = calc_persistence_branch(b_map[i], data);
 
         branch_data->c_s_min = 10000.0; //since maximum value is 255
         branch_data->c_s_max = 0;
@@ -240,7 +239,7 @@ double std_avg_importance(ctBranch* b)
     FeatureSet* ptr = (FeatureSet*) b->data;
     if(ptr == NULL) return 0.0;
 
-    return sqrt(pow(ptr->hv * ptr->p, 2) + pow(ptr->v * ptr->p, 2) + pow(ptr->hv * ptr->v, 2));
+    return 0.5 * sqrt(pow(ptr->hv * ptr->p, 2) + pow(ptr->v * ptr->p, 2) + pow(ptr->hv * ptr->v, 2));
 }
 
 double std_log_importance(ctBranch* b)
@@ -314,7 +313,7 @@ double arc_priority_proc(ctNode* leaf_node, void*)
     double v = data_arc->v;
     double hv = data_arc->hv;
     double p = data_arc->p;
-    double arc_importance = sqrt(pow(hv * p, 2) + pow(v * p, 2) + pow(hv * v, 2));
+    double arc_importance = 0.5 * sqrt(pow(hv * p, 2) + pow(v * p, 2) + pow(hv * v, 2));
     return arc_importance;
 }
 
@@ -327,7 +326,7 @@ double half_std_avg_importance_normalized(ctBranch* b)
     FeatureSet* ptr = (FeatureSet*) b->data;
     if(ptr == NULL) return 0.0;
 
-    return 0.5*sqrt(pow(ptr->norm_hv * ptr->norm_p, 2) + pow(ptr->norm_v * ptr->norm_p, 2) + pow(ptr->norm_hv * ptr->norm_v, 2));
+    return 0.5 * sqrt(pow(ptr->norm_hv * ptr->norm_p, 2) + pow(ptr->norm_v * ptr->norm_p, 2) + pow(ptr->norm_hv * ptr->norm_v, 2));
 }
 
 void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Data* data)
@@ -374,12 +373,12 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Dat
             //std::cout << branch_data->depth << " - " << branch_data->num_children << ", ";
             branch_data->alpha_lo = calc_alpha_sum(curr_branch);
             branch_data->alpha_hi = calc_alpha_sum(curr_branch) + branch_data->alpha_i_j;
-            branch_data->alpha = calc_final_alpha(curr_branch,LINEAR, data);
-            std::cout << "     Alo: " << branch_data->alpha_lo << " Ahi: " << branch_data->alpha_hi << /* " Imp: " << std_avg_importance(curr_branch) << */ std::endl;
-            std::cout << " Opacity: ";
-            for(int i = 0; i < 256; i++)
-                std::cout << branch_data->alpha[i] << " ";
-            std::cout << "\n\n";
+            branch_data->alpha = calc_final_alpha(curr_branch, LINEAR);
+//            std::cout << "     Alo: " << branch_data->alpha_lo << " Ahi: " << branch_data->alpha_hi << /* " Imp: " << std_avg_importance(curr_branch) << */ std::endl;
+//            std::cout << " Opacity: ";
+//            for(int i = 0; i < 256; i++)
+//                std::cout << branch_data->alpha[i] << " ";
+//            std::cout << "\n\n";
 
         }
 
@@ -393,7 +392,7 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Dat
     } while(!branch_queue.empty());
 }
 
-double* calc_final_alpha(ctBranch* b, TFShape shape, Data* data)
+double* calc_final_alpha(ctBranch* b, TFShape shape)
 {
     if(b == NULL) return nullptr;
     double* alpha_tf = (double*) calloc(256, sizeof(double));
@@ -415,15 +414,15 @@ double* calc_final_alpha(ctBranch* b, TFShape shape, Data* data)
         break;
     case LINEAR:
     default:
-        std::cout << "LINEAR shape chosen.\n";
+//        std::cout << "LINEAR shape chosen.\n";
         double m = (1 - 0) / (b_data->alpha_hi - b_data->alpha_lo);
 
         double step = (b_data->alpha_hi - b_data->alpha_lo) / 256.0;
         double x = b_data->alpha_lo;
 
-        std::cout << "m = " << m << std::endl;
-        std::cout << "step = " << step << std::endl;
-        std::cout << "x = " << x << std::endl;
+//        std::cout << "m = " << m << std::endl;
+//        std::cout << "step = " << step << std::endl;
+//        std::cout << "x = " << x << std::endl;
 
         for(int i = 0; i < 256 && x <= b_data->alpha_hi; i++, x += step)
             alpha_tf[i] = m * (x - b_data->alpha_lo);
