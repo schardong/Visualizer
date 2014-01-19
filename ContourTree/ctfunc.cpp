@@ -73,7 +73,7 @@ void calc_branch_depth(ctBranch* b, size_t* max_depth, size_t depth)
 {
     if(b == NULL) return;
 
-    if(b->data == NULL)        
+    if(b->data == NULL)
         b->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));
 
     FeatureSet* branch_data = (FeatureSet*) b->data;
@@ -87,7 +87,7 @@ void calc_branch_depth(ctBranch* b, size_t* max_depth, size_t depth)
         calc_branch_depth(c, max_depth, depth + 1);
 }
 
-void calc_branch_features(ctBranch* root_branch, ctBranch** b_map, Data* data)
+void calc_branch_features(ctBranch** b_map, Data* data)
 {
     if(b_map == NULL) return;
 
@@ -104,24 +104,24 @@ void calc_branch_features(ctBranch* root_branch, ctBranch** b_map, Data* data)
         branch_data->c_s_max = 0;
     }
 
-//    if(root_branch == NULL) return;
+    //    if(root_branch == NULL) return;
 
-//    if(root_branch->data == NULL)
-//        root_branch->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));
+    //    if(root_branch->data == NULL)
+    //        root_branch->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));
 
-//    FeatureSet* branch_data = (FeatureSet*) root_branch->data;
-//    size_t* f = parallel_calc_vol_hypervol_branch(root_branch, b_map, data);
+    //    FeatureSet* branch_data = (FeatureSet*) root_branch->data;
+    //    size_t* f = parallel_calc_vol_hypervol_branch(root_branch, b_map, data);
 
-//    branch_data->v = f[0];
-//    branch_data->hv = f[1];
-//    branch_data->p = calc_persistence_branch(root_branch, data);
-//    branch_data->c_s_min = 10000.0; //since maximum value is 255
-//    branch_data->c_s_max = 0;
-//    free(f); f = NULL;
+    //    branch_data->v = f[0];
+    //    branch_data->hv = f[1];
+    //    branch_data->p = calc_persistence_branch(root_branch, data);
+    //    branch_data->c_s_min = 10000.0; //since maximum value is 255
+    //    branch_data->c_s_max = 0;
+    //    free(f); f = NULL;
 
-//    for(ctBranch* c = root_branch->children.head; c!= NULL; c = c->nextChild) {
-//        calc_branch_features(c, b_map, data);
-//    }
+    //    for(ctBranch* c = root_branch->children.head; c!= NULL; c = c->nextChild) {
+    //        calc_branch_features(c, b_map, data);
+    //    }
 }
 
 void calc_branch_num_children(ctBranch* root_branch)
@@ -207,6 +207,46 @@ void normalize_features(ctBranch* root_branch)
 
     } while(!branch_queue.empty());
 
+}
+
+int label_branches(ctBranch* root_branch)
+{
+    if(root_branch == NULL) return -1;
+
+    std::queue<ctBranch*> branch_queue;
+    branch_queue.push(root_branch);
+
+    int curr_label = 0;
+    do {
+        ctBranch* curr_branch = branch_queue.front();
+        branch_queue.pop();
+
+        FeatureSet* branch_data = (FeatureSet*) curr_branch->data;
+        branch_data->label = curr_label++;
+
+        for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
+            FeatureSet* c_data = (FeatureSet*) c->data;
+            if(!c_data->remove)
+                branch_queue.push(c);
+        }
+
+    } while(!branch_queue.empty());
+
+    return curr_label;
+}
+
+void zero_branches(ctBranch *root_branch)
+{
+    if(root_branch == NULL) return;
+
+    if(root_branch->data == NULL)
+        root_branch->data = calloc(1, sizeof(FeatureSet));
+
+    FeatureSet* d = (FeatureSet*) root_branch->data;
+    memset(d, 0, sizeof(FeatureSet));
+
+    for(ctBranch* c = root_branch->children.head; c != NULL; c = c->nextChild)
+        zero_branches(c);
 }
 
 double calc_avg_importance(ctBranch* root_branch, double (*importance_measure)(ctBranch*))
@@ -340,7 +380,7 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Dat
     branch_queue.push(root_branch);
 
     do {
-        ctBranch* curr_branch = branch_queue.front();        
+        ctBranch* curr_branch = branch_queue.front();
         branch_queue.pop();
 
         if(curr_branch->data == NULL) {
@@ -376,17 +416,17 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Dat
             branch_data->alpha_hi = calc_alpha_sum(curr_branch) + branch_data->alpha_i_j;
 
             branch_data->alpha = calc_final_alpha(curr_branch, LINEAR);
-//            std::cout << "     Alo: " << branch_data->alpha_lo << " Ahi: " << branch_data->alpha_hi << /* " Imp: " << std_avg_importance(curr_branch) << */ std::endl;
-//            std::cout << " Opacity: ";
-//            for(int i = 0; i < 256; i++)
-//                std::cout << branch_data->alpha[i] << " ";
-//            std::cout << "\n\n";
+            //            std::cout << "     Alo: " << branch_data->alpha_lo << " Ahi: " << branch_data->alpha_hi << /* " Imp: " << std_avg_importance(curr_branch) << */ std::endl;
+            //            std::cout << " Opacity: ";
+            //            for(int i = 0; i < 256; i++)
+            //                std::cout << branch_data->alpha[i] << " ";
+            //            std::cout << "\n\n";
 
         }
 
         for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
             FeatureSet* c_data = (FeatureSet*) c->data;
-            if(!c_data->remove) {                
+            if(!c_data->remove) {
                 branch_queue.push(c);
             }
         }
@@ -416,15 +456,15 @@ double* calc_final_alpha(ctBranch* b, TFShape shape)
         break;
     case LINEAR:
     default:
-//        std::cout << "LINEAR shape chosen.\n";
+        //        std::cout << "LINEAR shape chosen.\n";
         double m = (1 - 0) / (b_data->alpha_hi - b_data->alpha_lo);
 
         double step = (b_data->alpha_hi - b_data->alpha_lo) / 256.0;
         double x = b_data->alpha_lo;
 
-//        std::cout << "m = " << m << std::endl;
-//        std::cout << "step = " << step << std::endl;
-//        std::cout << "x = " << x << std::endl;
+        //        std::cout << "m = " << m << std::endl;
+        //        std::cout << "step = " << step << std::endl;
+        //        std::cout << "x = " << x << std::endl;
 
         for(int i = 0; i < 256 && x <= b_data->alpha_hi; i++, x += step)
             alpha_tf[i] = m * (x - b_data->alpha_lo);

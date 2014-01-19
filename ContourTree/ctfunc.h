@@ -20,11 +20,19 @@ typedef enum
 } TFShape;
 
 size_t count_branches(ctBranch*);
-void calc_branch_features(ctBranch*, ctBranch**, Data*);
+void calc_branch_features(ctBranch**, Data*);
 double calc_avg_importance(ctBranch*, double (*importance_measure)(ctBranch*));
 void calc_branch_depth(ctBranch*, size_t*, size_t);
 void calc_branch_num_children(ctBranch*);
 void normalize_features(ctBranch*);
+int label_branches(ctBranch*);
+/**
+ * @brief zero_branches - Terrible workaround to guarantee that the data field of
+ * a branch will always be zero before the importance calculations.
+ * @param root_branch - The root of the branch decomposition.
+ */
+void zero_branches(ctBranch*);
+
 
 //Functions - @Netto
 void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Data* data);

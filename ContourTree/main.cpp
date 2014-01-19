@@ -29,7 +29,7 @@ void outputTree(std::ostream& out, ctBranch* b)
 {
     FeatureSet* fs = (FeatureSet*) b->data;
     if(fs->remove) return;
-    out << "  (" << b->extremum << ' ' << b->saddle << " [" << fs->v << " " << fs->hv << " " << fs->p << " " << fs->depth << " " << fs->remove << " " << fs->num_children << "]";
+    out << "  (" << b->extremum << ' ' << b->saddle << " [" << fs->label << " " << fs->v << " " << fs->hv << " " << fs->p << " " << fs->depth << " " << fs->remove << " " << fs->num_children << "]";
     for( ctBranch * c = b->children.head; c != NULL; c = c->nextChild ) {
         outputTree( out, c );
     }
@@ -52,9 +52,9 @@ size_t test_avg_importance(ctBranch* root_branch, double (*importance_measure)(c
         if(branch_importance >= avg_importance)
             larger++;
 
-        for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
+        for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild)
             branch_queue.push(c);
-        }
+
     } while(!branch_queue.empty());
 
     return larger;
@@ -75,38 +75,17 @@ void myFree(ctBranch* b, void*)
     b = NULL;
 }
 
-/**
- * @brief zero_branch - Terrible workaround to guarantee that the data field of
- * a branch will always be zero before the importance calculations.
- * @param root_branch - The root of the branch decomposition.
- */
-void zero_branch(ctBranch* root_branch)
-{
-    if(root_branch == NULL) return;
-
-    if(root_branch->data == NULL)
-        root_branch->data = calloc(1, sizeof(FeatureSet));
-
-    FeatureSet* d = (FeatureSet*) root_branch->data;
-    memset(d, 0, sizeof(FeatureSet));
-
-    for(ctBranch* c = root_branch->children.head; c != NULL; c = c->nextChild) {
-        zero_branch(c);
-    }
-}
-
 double opacity_max = 0.9;
 
 int main(int argc, char** argv)
 {
-//    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
+    //    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
     std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
-//    std::string path = "/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8";
-//    std::string path = "/home/guilherme/Pictures/datasets/stent.512x512x174.uint8";
+    //    std::string path = "/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8";
+    //    std::string path = "/home/guilherme/Pictures/datasets/stent.512x512x174.uint8";
 
-//    std::string path = "/home/netto/datasets/hydrogenAtom.128x128x128.uint8";
-//    std::string path = "/home/netto/datasets/nucleon.41x41x41.uint8";
-
+    //    std::string path = "/home/netto/datasets/hydrogenAtom.128x128x128.uint8";
+    //    std::string path = "/home/netto/datasets/nucleon.41x41x41.uint8";
 
     char prefix[1024];
     bool compressed;
@@ -128,25 +107,26 @@ int main(int argc, char** argv)
     ctBranch* root_branch = ct_decompose(ctx);
     ctBranch** branch_map = ct_branchMap(ctx);
 
-    zero_branch(root_branch);
+    zero_branches(root_branch);
     size_t max_depth = 0;
     calc_branch_depth(root_branch, &max_depth, 0);
-    cout << count_branches(root_branch) << " branches before simplification." << endl;
-    cout << "Tree depth = " << max_depth << endl;
+    //    cout << count_branches(root_branch) << " branches before simplification." << endl;
+    //    cout << "Tree depth = " << max_depth << endl;
 
-    tbb::tick_count a = tbb::tick_count::now();
-    calc_branch_features(root_branch, branch_map, &data);
-    tbb::tick_count b = tbb::tick_count::now();
-    cout << (b - a).seconds() << endl;
+    //    tbb::tick_count a = tbb::tick_count::now();
+    calc_branch_features(branch_map, &data);
+    //    tbb::tick_count b = tbb::tick_count::now();
+    //    cout << (b - a).seconds() << endl;
 
     double avg_importance = calc_avg_importance(root_branch, &std_avg_importance);
     simplify_tree_dfs(root_branch, branch_map, &data, ctx, &std_avg_importance, avg_importance / 10000);
+    label_branches(root_branch);
     calc_branch_num_children(root_branch);
 
-    cout << count_branches(root_branch) << " branches after simplification." << endl;
+    //    cout << count_branches(root_branch) << " branches after simplification." << endl;
 
-    cout << test_avg_importance(root_branch, &std_avg_importance, avg_importance / 10000) << " nodes are larger or equal than the threshold.\n";
-    cout << "Average importance = " << avg_importance << endl;
+    //    cout << test_avg_importance(root_branch, &std_avg_importance, avg_importance / 10000) << " nodes are larger or equal than the threshold.\n";
+    //    cout << "Average importance = " << avg_importance << endl;
 
     max_depth = 0;
     calc_branch_depth(root_branch, &max_depth, 0);
@@ -154,13 +134,12 @@ int main(int argc, char** argv)
     normalize_features(root_branch);
 
     std::ofstream out_file;
-    out_file.open("/home/guilherme/new_non_dumb_way.txt");
+    out_file.open("/home/guilherme/Projects/Visualizer/build/tree.txt");
     outputTree(out_file, root_branch);
     out_file.close();
-    cout << endl;
 
     //calc_gsd(root_branch, &data);
-    calc_residue_flow(root_branch, opacity_max /(double)max_depth, 300.0, &data);
+    calc_residue_flow(root_branch, opacity_max / (double) max_depth, 300.0, &data);
 
     ct_cleanup(ctx);
     free(root_branch);

@@ -1,4 +1,4 @@
-/*
+
 #ifndef CONTOURTREE_H
 #define CONTOURTREE_H
 
@@ -26,4 +26,4 @@ namespace ggraf
 }
 
 #endif // CONTOURTREE_H
-*/
+

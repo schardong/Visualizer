@@ -23,8 +23,10 @@ QMAKE_CXXFLAGS += -std=c++11 -DUSE_ZLIB -MMD
 
 INCLUDEPATH += ../include
 
+LIBS += -L$$OUT_PWD/../Kernel -lKernel
 LIBS += -lz
 LIBS += -ltourtre
+LIBS += -lKernel
 
 header.path = ../include
 header.files = $$HEADERS

@@ -12,6 +12,8 @@ typedef struct
     size_t depth;
     size_t num_children;
 
+    int label;   //branch label. Used to save the transfer functions in the right order.
+
     bool remove; //if set to true, the branch is removed from the tree.
     double delta_h; // (non leaf nodes)
     double* alpha; //opacity transfer function.
