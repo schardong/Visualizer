@@ -32,7 +32,7 @@ void calc_saddle_min_max(ctBranch* root_branch, Data* data);
 double calc_gsd(ctBranch* b, Data* data);
 double half_std_avg_importance_normalized(ctBranch*);
 double calc_alpha_sum(ctBranch* b);
-double* calc_final_alpha(ctBranch* b, TFShape shape, Data* data);
+double* calc_final_alpha(ctBranch* b, TFShape shape);
 
 //Callback functions used on my implementation.
 double std_avg_importance(ctBranch*);
