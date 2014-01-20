@@ -91,16 +91,16 @@ size_t save_vertex_branch_volume(ctBranch** branch_map, std::string filename, si
 
     size_t bytes_written = ggraf::ResourceManager::getInstance()->saveVertexToBranchMap(filename, w, h, slices, branch_vol);
 
-//    FILE* fp;
-//    if(!(fp = fopen(filename.c_str(), "wb+"))) {
-//        free(branch_vol);
-//        branch_vol = nullptr;
-//        return 0;
-//    }
+    //    FILE* fp;
+    //    if(!(fp = fopen(filename.c_str(), "wb+"))) {
+    //        free(branch_vol);
+    //        branch_vol = nullptr;
+    //        return 0;
+    //    }
 
-//    size_t bytes_written = fwrite(branch_vol, sizeof(char), num_elements, fp);
-//    fclose(fp);
-//    fp = nullptr;
+    //    size_t bytes_written = fwrite(branch_vol, sizeof(char), num_elements, fp);
+    //    fclose(fp);
+    //    fp = nullptr;
 
     memset(branch_vol, 0, sizeof(unsigned int));
     free(branch_vol);
@@ -113,10 +113,10 @@ double opacity_max = 0.9;
 
 int main(int argc, char** argv)
 {
-    //    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
-//    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
+    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
+    //    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
     //    std::string path = "/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8";
-        std::string path = "/home/guilherme/Pictures/datasets/stent.512x512x174.uint8";
+    //    std::string path = "/home/guilherme/Pictures/datasets/stent.512x512x174.uint8";
 
     //    std::string path = "/home/netto/datasets/hydrogenAtom.128x128x128.uint8";
     //    std::string path = "/home/netto/datasets/nucleon.41x41x41.uint8";
@@ -155,7 +155,7 @@ int main(int argc, char** argv)
     double avg_importance = calc_avg_importance(root_branch, &std_avg_importance);
     simplify_tree_dfs(root_branch, /*branch_map, &data, ctx,*/ &std_avg_importance, avg_importance / 10000);
     label_branches(root_branch);
-    save_vertex_branch_volume(branch_map, "/home/guilherme/Projects/Visualizer/stent-vtb.512x512x174.uint8", data.size[0], data.size[1], data.size[2]);
+    save_vertex_branch_volume(branch_map, "/home/guilherme/Projects/Visualizer/nucleon-vtb.41x41x41.uint8", data.size[0], data.size[1], data.size[2]);
     calc_branch_num_children(root_branch);
 
     //    cout << count_branches(root_branch) << " branches after simplification." << endl;
