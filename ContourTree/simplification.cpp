@@ -65,7 +65,7 @@ void mark_for_removal(ctBranch* root_branch, double (*importance_measure)(ctBran
 
 //}
 
-void simplify_tree_dfs(ctBranch* root_branch, ctBranch** branch_map, Data* data, ctContext* ctx, double (*importance_measure)(ctBranch*), double threshold)
+void simplify_tree_dfs(ctBranch* root_branch, double (*importance_measure)(ctBranch*), double threshold)
 {
     mark_for_removal(root_branch, importance_measure, threshold);
     //    remove_marked_branches(root_branch, branch_map, data, ctx);
