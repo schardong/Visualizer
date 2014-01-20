@@ -40,6 +40,29 @@ namespace ggraf
 
     }
 
+    static size_t saveRawFile(std::string filename, size_t num_elements, size_t bytes_per_element, void* contents)
+    {
+        if(filename.empty() || num_elements <= 0 || bytes_per_element <= 0 || contents == nullptr)
+            return 0;
+
+        FILE* fp;
+        Logger::getInstance()->log("ggraf::ResourceManager::saveRawFile(" +
+                                   filename + ", " +
+                                   std::to_string(num_elements) + ", " +
+                                   std::to_string(bytes_per_element) + ")");
+
+        if(!(fp = fopen(filename.c_str(), "wb+"))) {
+            Logger::getInstance()->error("Failed to open the file " + filename);
+            return 0;
+        }
+
+        size_t bytes_written = fwrite(contents, bytes_per_element, num_elements, fp);
+        fclose(fp);
+        fp = nullptr;
+
+        return bytes_written;
+    }
+
     void* ResourceManager::loadVolumeData(std::string filename, int w, int h, int slices, size_t bytes_per_pixel)
     {
 //        FILE* fp;
@@ -102,7 +125,20 @@ namespace ggraf
 //            exit(EXIT_FAILURE);
 //        }
 
-//        return voxels;
+        //        return voxels;
+    }
+
+    size_t ResourceManager::saveVertexToBranchMap(std::string filename, int w, int h, int slices, unsigned int* branch_map)
+    {
+        size_t num_voxels = w * h * slices;
+
+        Logger::getInstance()->log("ggraf::ResourceManager::saveVertexToBranchMap(" +
+                                   filename + ", " +
+                                   std::to_string(w) + ", " +
+                                   std::to_string(h) + ", " +
+                                   std::to_string(slices) + ")");
+
+        return saveRawFile(filename, num_voxels, sizeof(unsigned int), branch_map);
     }
 
     unsigned char* ResourceManager::loadTransferFuncion(std::string filename, size_t bytes_per_pixel)

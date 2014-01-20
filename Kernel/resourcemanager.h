@@ -18,6 +18,7 @@ namespace ggraf
     public:
         void* loadVolumeData(std::string filename, int w, int h, int slices, size_t bytes_per_pixel);
         void* loadVertexToBranchMap(std::string filename, int w, int h, int slices);
+        size_t saveVertexToBranchMap(std::string filename, int w, int h, int slices, unsigned int* branch_map);
         unsigned char* loadTransferFuncion(std::string filename, size_t bytes_per_pixel);
         unsigned char* loadMultiDimensionalTransferFunction(std::string filename, int width, int height, size_t bytes_per_pixel);
 
