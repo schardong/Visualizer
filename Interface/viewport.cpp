@@ -65,6 +65,11 @@ namespace Ui
         scene->setRayTransfersalMode(rtm);
     }
 
+    void Viewport::buildContourTree()
+    {
+        Logger::getInstance()->warn("void Viewport::buildContourTree is not fully implemented yet!");
+    }
+
     void Viewport::initializeGL()
     {
         makeCurrent();

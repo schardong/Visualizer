@@ -27,6 +27,8 @@ namespace Ui
         void modeMIP();
         void modeAVG();
         void modeCOM();
+
+        void buildContourTree();
 //        void increaseSamples();
 //        void decreaseSamples();
 
@@ -41,8 +43,11 @@ namespace Ui
         QAction* avgAction;
         QAction* comAction;
 
+        QAction* contourTreeAction;
+
         QMenu* fileMenu;
         QMenu* viewMenu;
+        QMenu* toolMenu;
 
         static const float STEP;
     };

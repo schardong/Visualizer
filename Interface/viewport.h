@@ -28,6 +28,7 @@ namespace Ui
         void setNumSamples(float);
         float getNumSamples();
         void setRayTransversalMode(Renderer::RAY_TRANSVERSAL);
+        void buildContourTree();
 
     protected:
         void initializeGL();

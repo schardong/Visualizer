@@ -31,6 +31,9 @@ namespace Ui
         comAction = new QAction("Composition Projection", this);
         connect(comAction, SIGNAL(triggered()), this, SLOT(modeCOM()));
 
+        contourTreeAction = new QAction("Build Contour Tree", this);
+        connect(contourTreeAction, SIGNAL(triggered()), this, SLOT(buildContourTree()));
+
         fileMenu = new QMenu("File", this);
         fileMenu->addAction(loadVolAction);
         fileMenu->addAction(loadTFAction);
@@ -42,10 +45,14 @@ namespace Ui
         viewMenu->addAction(avgAction);
         viewMenu->addAction(comAction);
 
+        toolMenu = new QMenu("Tools", this);
+        toolMenu->addAction(contourTreeAction);
+
         menuBar()->addMenu(fileMenu);
         menuBar()->addMenu(viewMenu);
+        menuBar()->addMenu(toolMenu);
 
-        resize(800, 800);
+        resize(600, 600);
 
         QGLFormat f;
         f.setVersion(4, 2);
@@ -62,7 +69,7 @@ namespace Ui
 
     void MainWindow::loadVolume()
     {
-        QString path = QFileDialog::getOpenFileName(this, "Load Volume", QDir::home().absolutePath());
+        QString path = QFileDialog::getOpenFileName(this, "Load Dataset", QDir::home().absolutePath());
         if(!path.isEmpty()) {
             view->loadVolume(path.toStdString());
         }
@@ -95,6 +102,12 @@ namespace Ui
     void MainWindow::modeCOM()
     {
         view->setRayTransversalMode(Renderer::RAY_TRANSVERSAL::COM);
+    }
+
+    void MainWindow::buildContourTree()
+    {
+        Logger::getInstance()->warn("void MainWindow::buildContourTree is not fully implemented yet!");
+        view->buildContourTree();
     }
 
 }
