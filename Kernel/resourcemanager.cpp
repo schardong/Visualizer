@@ -130,6 +130,19 @@ namespace ggraf
         return (unsigned char*) loadRawFile(filename, num_rgba, 1);
     }
 
+    size_t ResourceManager::saveMultiDimensionalTransferFunction(std::string filename, int w, int h, size_t bytes_per_pixel, void* tf_data)
+    {
+        size_t num_alpha = w * h;
+
+        Logger::getInstance()->log("ggraf::ResourceManager::saveMultiDimensionalTransferFunction(" +
+                                   filename + ", " +
+                                   std::to_string(w) + ", " +
+                                   std::to_string(h) + ", " +
+                                   std::to_string(bytes_per_pixel) + ")");
+
+        return saveRawFile(filename, num_alpha, bytes_per_pixel, tf_data);
+    }
+
     GLuint ResourceManager::createVolumeTex(int w, int h, int slices, size_t bytes_per_pixel, void* data)
     {
         if(data == NULL)
