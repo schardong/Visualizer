@@ -20,7 +20,8 @@ SOURCES += \
     resourcemanager.cpp \
     gl3w.c \
     kernel.cpp \
-    logger.cpp
+    logger.cpp \
+    multidimvolumedata.cpp
 
 HEADERS += \
     volumedata.h \
@@ -29,7 +30,8 @@ HEADERS += \
     scene.h \
     resourcemanager.h \
     kernel.h \
-    logger.h
+    logger.h \
+    multidimvolumedata.h
 
 INCLUDEPATH += ../include
 
