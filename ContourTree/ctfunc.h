@@ -12,7 +12,7 @@ extern "C"
 
 typedef enum
 {
-    LINEAR,     // y = ax.
+    LINEAR,     // y = ax + b.
     HAT,        //0.45 to 0.55 is different than 0. Max at 0.5.
     TRIANGLE,   //Max at 0.5
     TRAPEZOID,  //Growth until 0.45. Max value to the end.
@@ -32,6 +32,7 @@ int label_branches(ctBranch*);
  * @param root_branch - The root of the branch decomposition.
  */
 void zero_branches(ctBranch*);
+size_t save_vertex_branch_volume(ctBranch**, std::string, size_t, size_t, size_t);
 
 
 //Functions - @Netto
