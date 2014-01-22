@@ -35,17 +35,22 @@ bool branch_is_leaf(ctBranch* b)
 //    ctBranch_delete(branch_to_remove, ctx);
 //}
 
-void mark_for_removal(ctBranch* root_branch, double (*importance_measure)(ctBranch*), double threshold)
+void mark_for_removal(ctBranch* root_branch, ctBranch** branch_map, size_t data_size, double (*importance_measure)(ctBranch*), double threshold)
 {
     if(root_branch == NULL) return;
     FeatureSet* branch_data = (FeatureSet*) root_branch->data;
 
     for(ctBranch* c = root_branch->children.head; c != NULL; c = c->nextChild)
-        mark_for_removal(c, importance_measure, threshold);
+        mark_for_removal(c, branch_map, data_size, importance_measure, threshold);
 
     if(branch_is_leaf(root_branch)) {
         importance_measure(root_branch) > threshold ? branch_data->remove = false : branch_data->remove = true;
         //TODO: Associate the vertices with the parent branch
+        for(size_t i = 0; i < data_size; i++) {
+            if(branch_map[i] == root_branch && root_branch->parent != NULL) {
+                branch_map[i] = root_branch->parent;
+            }
+        }
     }
 }
 
@@ -65,9 +70,9 @@ void mark_for_removal(ctBranch* root_branch, double (*importance_measure)(ctBran
 
 //}
 
-void simplify_tree_dfs(ctBranch* root_branch, double (*importance_measure)(ctBranch*), double threshold)
+void simplify_tree_dfs(ctBranch* root_branch, ctBranch** branch_map, size_t data_size, double (*importance_measure)(ctBranch*), double threshold)
 {
-    mark_for_removal(root_branch, importance_measure, threshold);
+    mark_for_removal(root_branch, branch_map, data_size, importance_measure, threshold);
     //    remove_marked_branches(root_branch, branch_map, data, ctx);
     //    if(root_branch == NULL) return;
     //    FeatureSet* branch_data = (FeatureSet*) root_branch->data;

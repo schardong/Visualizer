@@ -16,7 +16,7 @@ extern "C"
    and if the calculated importance is lesser than a given threshold, the branch is marked for
    removal.
 */
-void simplify_tree_dfs(ctBranch*, double (*importance_measure)(ctBranch*), double);
+void simplify_tree_dfs(ctBranch*, ctBranch**, size_t, double (*importance_measure)(ctBranch*), double);
 
 //void simplify_tree_bfs(ctBranch*, double (*importance_measure)(ctBranch*), double);
 
