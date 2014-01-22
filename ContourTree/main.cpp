@@ -77,8 +77,8 @@ void save_transfer_functions(ctBranch* root_branch, std::string filename, int nu
         FeatureSet* branch_data = (FeatureSet*) curr_branch->data;
         for(int i = 0; i < 256; i++) {
             tf_arr[branch_data->label * 256 + i] = (unsigned char) branch_data->alpha[i] * 256;
-            cout << "branch_data->alpha[" << i << "] = " << branch_data->alpha[i];
-            cout <<"\ttf_arr[" << branch_data->label * 256 + i << "] = " << branch_data->alpha[i] * 256 << endl;
+//            cout << "branch_data->alpha[" << i << "] = " << branch_data->alpha[i];
+//            cout <<"\ttf_arr[" << branch_data->label * 256 + i << "] = " << branch_data->alpha[i] * 256 << endl;
         }
 
         for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
