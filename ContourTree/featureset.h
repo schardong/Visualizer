@@ -25,6 +25,9 @@ typedef struct
     double c_s_min; //children minimum saddle value
     double c_s_max; //children maximum saddle value
 
+    size_t min_intensity; //Maximum scalar value of the vertices .
+    size_t max_intensity; //Minimum scalar value of the vertices.
+
     double norm_v;
     double norm_p;
     double norm_hv;

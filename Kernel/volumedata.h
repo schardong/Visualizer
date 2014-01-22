@@ -9,13 +9,7 @@ namespace ggraf
 {
     class VolumeData
     {
-    private:
-        int m_iVaoId;
-        int m_aTexIds[2];
-        glm::vec3 m_vDimensions;
-        glm::vec3 m_vScaleFactor;
-        glm::mat4 m_mModelMatrix;
-        std::pair<size_t, size_t> m_dataTypes;
+    protected:
 
         typedef struct
         {
@@ -30,46 +24,54 @@ namespace ggraf
             size_t bytes_per_pixel;
         } ParsedTFPath;
 
+        int m_iVaoId;
+        glm::vec3 m_vDimensions;
+        glm::vec3 m_vScaleFactor;
+        glm::mat4 m_mModelMatrix;
+
         ParsedVolPath* parseVolumePath(std::string path);
         ParsedTFPath* parseTFPath(std::string path);
+    private:
+        int m_aTexIds[2];
+        std::pair<size_t, size_t> m_dataTypes;
 
     public:
         VolumeData();
         VolumeData(std::string volume_path, std::string tf_path);
-        ~VolumeData();
+        virtual ~VolumeData();
 
         inline glm::mat4& getModelMatrix()
         {
             return m_mModelMatrix;
         }
 
-        inline int getVolumeTexId()
+        virtual inline int getVolumeTexId()
         {
             return m_aTexIds[0];
         }
 
-        inline int getTransferFuncTexId()
+        virtual inline int getTransferFuncTexId()
         {
             return m_aTexIds[1];
         }
 
-        inline bool isVolumeLoaded()
+        virtual inline bool isVolumeLoaded()
         {
             return m_aTexIds[0] == 0? false : true;
         }
 
-        inline bool isTfLoaded()
+        virtual inline bool isTfLoaded()
         {
             return m_aTexIds[1] == 0? false : true;
         }
 
-        inline std::pair<size_t, size_t> getDataTypes()
+        virtual inline std::pair<size_t, size_t> getDataTypes()
         {
             return m_dataTypes;
         }
 
-        void loadVolume(std::string path);
-        void loadTransferFunction(std::string path);
+        virtual void loadVolume(std::string path);
+        virtual void loadTransferFunction(std::string path);
         void render();
     };
 }

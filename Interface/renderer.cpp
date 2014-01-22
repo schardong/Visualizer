@@ -8,6 +8,8 @@
 #include <sstream>
 #include <QFileDialog>
 
+#include "multidimvolumedata.h"
+
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -24,6 +26,10 @@ Renderer::Renderer(int w, int h)
     numSamples = 256.f;
     mode = COM;
     vd = new ggraf::VolumeData("/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8", "/home/guilherme/Pictures/datasets/tff1.uint8");
+    ggraf::MultiDimVolumeData* test = new ggraf::MultiDimVolumeData("/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8",
+                                                                    "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8-vtb",
+                                                                    "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8-tf",
+                                                                    "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8-ctf");
 }
 
 Renderer::~Renderer()

@@ -2,8 +2,12 @@
 
 uniform sampler3D u_sDensityMap;
 uniform sampler3D u_sVertexToBranchMap;
-uniform sampler2D u_sTransferFunction;
+
+uniform sampler2D u_sOpacityTransferFunction;
+uniform sampler1D u_sColorTransferFunction;
+
 uniform sampler2D u_sBackFaces;
+
 
 uniform vec2 u_vScreenSize;
 uniform float u_fNumSamples;
@@ -28,17 +32,34 @@ vec4 composite(Ray ray, vec3 step)
     float lenAcc = 0.f;
 
     for(int i = 0; i < u_fNumSamples; i++, currPos += step, lenAcc += length(step)) {
-        vec4 colorSample = texture(u_sTransferFunction, texture(u_sDensityMap, currPos).r);
 
-        colorSample = abs(colorSample);
-        colorSample.a = clamp(colorSample.a, 0.f, 1.f);
+        float scalar_val = texture(u_sDensityMap, currPos).r;
+        float branch = texture(u_sVertexToBranchMap, currPos).r;
 
-        colorSample.rgb *= colorSample.a;
-        colorAcc = (1.f - colorAcc.a) * colorSample + colorAcc;
+        vec4 color_sample;
+        color_sample.a = texture(u_sOpacityTransferFunction, vec2(branch, scalar_val));
+        color_sample.rgb = texture(u_sColorTransferFunction, scalar_val);
 
-        if(colorAcc.a > 0.95f || lenAcc >= len) {
+        color_sample = abs(color_sample);
+        color_sample.a = clamp(color_sample.a, 0.f, 1.f);
+
+        color_sample.rgb *= color_sample.a;
+        colorAcc = (1.f - colorAcc.a) * color_sample + colorAcc;
+
+        if(colorAcc.a >= 0.9)
             break;
-        }
+
+//        vec4 colorSample = texture(u_sTransferFunction, texture(u_sDensityMap, currPos).r);
+
+//        colorSample = abs(colorSample);
+//        colorSample.a = clamp(colorSample.a, 0.f, 1.f);
+
+//        colorSample.rgb *= colorSample.a;
+//        colorAcc = (1.f - colorAcc.a) * colorSample + colorAcc;
+
+//        if(colorAcc.a > 0.95f || lenAcc >= len) {
+//            break;
+//        }
     }
 
     return colorAcc;

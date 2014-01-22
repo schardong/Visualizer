@@ -1,5 +1,6 @@
 #include "ctfunc.h"
 #include "featureset.h"
+#include "resourcemanager.h"
 
 #include <queue>
 #include <cstring>
@@ -102,6 +103,10 @@ void calc_branch_features(ctBranch** b_map, Data* data)
 
         branch_data->c_s_min = 10000.0; //since maximum value is 255
         branch_data->c_s_max = 0;
+        if(branch_data->min_intensity > data->data[i])
+            branch_data->min_intensity = data->data[i];
+        else if(branch_data->max_intensity < data->data[i])
+            branch_data->max_intensity = data->data[i];
     }
 
     //    if(root_branch == NULL) return;
@@ -244,6 +249,7 @@ void zero_branches(ctBranch *root_branch)
 
     FeatureSet* d = (FeatureSet*) root_branch->data;
     memset(d, 0, sizeof(FeatureSet));
+    d->min_intensity = 4096;
 
     for(ctBranch* c = root_branch->children.head; c != NULL; c = c->nextChild)
         zero_branches(c);
@@ -416,11 +422,12 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Dat
             branch_data->alpha_hi = calc_alpha_sum(curr_branch) + branch_data->alpha_i_j;
 
             branch_data->alpha = calc_final_alpha(curr_branch, LINEAR);
-            //            std::cout << "     Alo: " << branch_data->alpha_lo << " Ahi: " << branch_data->alpha_hi << /* " Imp: " << std_avg_importance(curr_branch) << */ std::endl;
-            //            std::cout << " Opacity: ";
-            //            for(int i = 0; i < 256; i++)
-            //                std::cout << branch_data->alpha[i] << " ";
-            //            std::cout << "\n\n";
+            std::cout << "     Alo: " << branch_data->alpha_lo << " Ahi: " << branch_data->alpha_hi << /* " Imp: " << std_avg_importance(curr_branch) << */ std::endl;
+            std::cout << "     Min scalar: " << branch_data->min_intensity << " Max scalar: " << branch_data->max_intensity << std::endl;
+            std::cout << " Opacity: ";
+            for(int i = 0; i < 256; i++)
+                std::cout << branch_data->alpha[i] << " ";
+            std::cout << "\n\n";
 
         }
 
@@ -456,19 +463,10 @@ double* calc_final_alpha(ctBranch* b, TFShape shape)
         break;
     case LINEAR:
     default:
-        //        std::cout << "LINEAR shape chosen.\n";
-        double m = (1 - 0) / (b_data->alpha_hi - b_data->alpha_lo);
-
-        double step = (b_data->alpha_hi - b_data->alpha_lo) / 256.0;
-        double x = b_data->alpha_lo;
-
-        //        std::cout << "m = " << m << std::endl;
-        //        std::cout << "step = " << step << std::endl;
-        //        std::cout << "x = " << x << std::endl;
-
-        for(int i = 0; i < 256 && x <= b_data->alpha_hi; i++, x += step)
-            alpha_tf[i] = m * (x - b_data->alpha_lo);
-        break;
+        double a = (b_data->alpha_hi - b_data->alpha_lo) / (b_data->max_intensity - b_data->min_intensity);
+        double b = b_data->alpha_hi - a * b_data->max_intensity;
+        for(size_t i = b_data->min_intensity; i < b_data->max_intensity; i++)
+            alpha_tf[i] = a * i + b;
     }
     return alpha_tf;
 }
@@ -530,4 +528,26 @@ void calc_saddle_min_max(ctBranch* root_branch, Data* data)
             std::cout << "nc: " << branch_data->num_children << " min: " << branch_data->c_s_min << " max: " << branch_data->c_s_max << std::endl;
         }
     } while(!branch_queue.empty());
+}
+
+size_t save_vertex_branch_volume(ctBranch** branch_map, std::string filename, size_t w, size_t h, size_t slices)
+{
+    if(branch_map == NULL || filename.empty()) return 0;
+
+    size_t num_elements = w * h * slices;
+
+    unsigned int* branch_vol = (unsigned int*) calloc(num_elements, sizeof(unsigned int));
+
+    for(size_t i = 0; i < num_elements; i++) {
+        FeatureSet* branch_data = (FeatureSet*) branch_map[i]->data;
+        branch_vol[i] = branch_data->label;
+    }
+
+    size_t bytes_written = ggraf::ResourceManager::getInstance()->saveVertexToBranchMap(filename, w, h, slices, branch_vol);
+
+    memset(branch_vol, 0, sizeof(unsigned int));
+    free(branch_vol);
+    branch_vol = nullptr;
+
+    return bytes_written;
 }
