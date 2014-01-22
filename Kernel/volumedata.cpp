@@ -17,13 +17,13 @@ namespace ggraf
 {
     VolumeData::VolumeData()
     {
-        m_aTexIds[0] = m_aTexIds[1] = 0;
+        std::memset(m_aTexIds, 0, sizeof(int) * 2);
         m_iVaoId = ggraf::ResourceManager::getInstance()->createCubeVAO();
     }
 
     VolumeData::VolumeData(std::string volume_path, std::string tf_path)
     {
-        m_aTexIds[0] = m_aTexIds[1] = 0;
+        std::memset(m_aTexIds, 0, sizeof(int) * 2);
         loadVolume(volume_path);
         loadTransferFunction(tf_path);
 
