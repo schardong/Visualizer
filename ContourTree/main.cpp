@@ -37,28 +37,13 @@ void outputTree(std::ostream& out, ctBranch* b)
     out << ")";
 }
 
-size_t test_avg_importance(ctBranch* root_branch, double (*importance_measure)(ctBranch*), double avg_importance)
+void output_branch_map(std::ostream& out, ctBranch** b_map, size_t data_size)
 {
-    if(root_branch == NULL) return 0.0;
-
-    std::queue<ctBranch*> branch_queue;
-    branch_queue.push(root_branch);
-    size_t larger = 0;
-
-    do {
-        ctBranch* curr_branch = branch_queue.front();
-        branch_queue.pop();
-
-        double branch_importance = importance_measure(curr_branch);
-        if(branch_importance >= avg_importance)
-            larger++;
-
-        for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild)
-            branch_queue.push(c);
-
-    } while(!branch_queue.empty());
-
-    return larger;
+    for(size_t i = 0; i < data_size; i++) {
+        FeatureSet* fs = (FeatureSet*) b_map[i]->data;
+        if(fs->remove) continue;
+        out << i << "\t" << fs->label << endl;
+    }
 }
 
 ctBranch* myAlloc(void*)
@@ -76,37 +61,36 @@ void myFree(ctBranch* b, void*)
     b = NULL;
 }
 
-size_t save_vertex_branch_volume(ctBranch** branch_map, std::string filename, size_t w, size_t h, size_t slices)
+void save_transfer_functions(ctBranch* root_branch, std::string filename, int num_tfs)
 {
-    if(branch_map == NULL || filename.empty()) return 0;
+    if(root_branch == NULL || filename.empty() || num_tfs <= 0) return;
 
-    size_t num_elements = w * h * slices;
+    unsigned char* tf_arr = (unsigned char*) calloc(num_tfs * 256, sizeof(unsigned char));
 
-    unsigned int* branch_vol = (unsigned int*) calloc(num_elements, sizeof(unsigned int));
+    std::queue<ctBranch*> branch_queue;
+    branch_queue.push(root_branch);
 
-    for(size_t i = 0; i < num_elements; i++) {
-        FeatureSet* branch_data = (FeatureSet*) branch_map[i]->data;
-        branch_vol[i] = branch_data->label;
-    }
+    do {
+        ctBranch* curr_branch = branch_queue.front();
+        branch_queue.pop();
 
-    size_t bytes_written = ggraf::ResourceManager::getInstance()->saveVertexToBranchMap(filename, w, h, slices, branch_vol);
+        FeatureSet* branch_data = (FeatureSet*) curr_branch->data;
+        for(int i = 0; i < 256; i++) {
+            tf_arr[branch_data->label * 256 + i] = (unsigned char) branch_data->alpha[i] * 256;
+            cout << "branch_data->alpha[" << i << "] = " << branch_data->alpha[i];
+            cout <<"\ttf_arr[" << branch_data->label * 256 + i << "] = " << branch_data->alpha[i] * 256 << endl;
+        }
 
-    //    FILE* fp;
-    //    if(!(fp = fopen(filename.c_str(), "wb+"))) {
-    //        free(branch_vol);
-    //        branch_vol = nullptr;
-    //        return 0;
-    //    }
+        for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
+            FeatureSet* c_data = (FeatureSet*) c->data;
+            if(!c_data->remove)
+                branch_queue.push(c);
+        }
 
-    //    size_t bytes_written = fwrite(branch_vol, sizeof(char), num_elements, fp);
-    //    fclose(fp);
-    //    fp = nullptr;
+    } while(!branch_queue.empty());
 
-    memset(branch_vol, 0, sizeof(unsigned int));
-    free(branch_vol);
-    branch_vol = nullptr;
+    ggraf::ResourceManager::getInstance()->saveMultiDimensionalTransferFunction(filename, 256, num_tfs, sizeof(unsigned char), tf_arr);
 
-    return bytes_written;
 }
 
 double opacity_max = 0.9;
@@ -144,6 +128,7 @@ int main(int argc, char** argv)
     zero_branches(root_branch);
     size_t max_depth = 0;
     calc_branch_depth(root_branch, &max_depth, 0);
+
     //    cout << count_branches(root_branch) << " branches before simplification." << endl;
     //    cout << "Tree depth = " << max_depth << endl;
 
@@ -153,29 +138,28 @@ int main(int argc, char** argv)
     //    cout << (b - a).seconds() << endl;
 
     double avg_importance = calc_avg_importance(root_branch, &std_avg_importance);
-    simplify_tree_dfs(root_branch, /*branch_map, &data, ctx,*/ &std_avg_importance, avg_importance / 10000);
-    label_branches(root_branch);
-    save_vertex_branch_volume(branch_map, "/home/guilherme/Projects/Visualizer/nucleon-vtb.41x41x41.uint8", data.size[0], data.size[1], data.size[2]);
+    simplify_tree_dfs(root_branch, branch_map, data.totalSize, &std_avg_importance, avg_importance / 10000);
+//    outputTree(std::cout, root_branch);
+    calc_branch_features(branch_map, &data);
+    int last_label = label_branches(root_branch);
+//    outputTree(std::cout, root_branch);
+    save_vertex_branch_volume(branch_map, path + "-vtb", data.size[0], data.size[1], data.size[2]);
+
     calc_branch_num_children(root_branch);
-
-    //    cout << count_branches(root_branch) << " branches after simplification." << endl;
-
-    //    cout << test_avg_importance(root_branch, &std_avg_importance, avg_importance / 10000) << " nodes are larger or equal than the threshold.\n";
-    //    cout << "Average importance = " << avg_importance << endl;
 
     max_depth = 0;
     calc_branch_depth(root_branch, &max_depth, 0);
     cout << "Tree depth = " << max_depth << "\nOpacity per depth level = " << opacity_max / max_depth << endl;
     normalize_features(root_branch);
 
-    std::ofstream out_file;
-    out_file.open("/home/guilherme/Projects/Visualizer/tree.txt");
-    outputTree(out_file, root_branch);
-    out_file.close();
+//    std::ofstream out_file;
+//    out_file.open(path + "-vtb");
+//    outputTree(out_file, root_branch);
+//    out_file.close();
 
     //calc_gsd(root_branch, &data);
     calc_residue_flow(root_branch, opacity_max / (double) max_depth, 300.0, &data);
-
+save_transfer_functions(root_branch, path + "-tf", last_label);
     ct_cleanup(ctx);
     free(root_branch);
     free(branch_map);
