@@ -84,8 +84,6 @@ namespace ggraf
         m_mModelMatrix = glm::scale(glm::mat4(1.f), m_vScaleFactor);
         m_mModelMatrix = glm::translate<float>(m_mModelMatrix, glm::vec3(-.5, -.5, -.5));
 
-        //Montar a contourtree aqui.
-
         free(voxels);
         voxels = NULL;
     }

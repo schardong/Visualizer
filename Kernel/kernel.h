@@ -7,6 +7,7 @@
 #include "shader.h"
 #include "singleton.h"
 #include "volumedata.h"
+#include "multidimvolumedata.h"
 #include "logger.h"
 
 #include <glm/glm.hpp>
