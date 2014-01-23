@@ -49,17 +49,6 @@ vec4 composite(Ray ray, vec3 step)
         if(colorAcc.a >= 0.9)
             break;
 
-//        vec4 colorSample = texture(u_sTransferFunction, texture(u_sDensityMap, currPos).r);
-
-//        colorSample = abs(colorSample);
-//        colorSample.a = clamp(colorSample.a, 0.f, 1.f);
-
-//        colorSample.rgb *= colorSample.a;
-//        colorAcc = (1.f - colorAcc.a) * colorSample + colorAcc;
-
-//        if(colorAcc.a > 0.95f || lenAcc >= len) {
-//            break;
-//        }
     }
 
     return colorAcc;

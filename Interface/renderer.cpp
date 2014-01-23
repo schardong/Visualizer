@@ -25,11 +25,10 @@ Renderer::Renderer(int w, int h)
     fovy = 45;
     numSamples = 256.f;
     mode = COM;
-    vd = new ggraf::VolumeData("/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8", "/home/guilherme/Pictures/datasets/tff1.uint8");
-    ggraf::MultiDimVolumeData* test = new ggraf::MultiDimVolumeData("/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8",
-                                                                    "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8-vtb",
-                                                                    "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8-tf",
-                                                                    "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8-ctf");
+    vd = new ggraf::VolumeData("/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8",
+                               "/home/guilherme/Pictures/datasets/transfer-functions/tff1.uint8");
+
+
 }
 
 Renderer::~Renderer()
