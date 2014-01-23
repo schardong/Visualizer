@@ -77,8 +77,8 @@ void save_transfer_functions(ctBranch* root_branch, std::string filename, int nu
         FeatureSet* branch_data = (FeatureSet*) curr_branch->data;
         for(int i = 0; i < 256; i++) {
             tf_arr[branch_data->label * 256 + i] = (unsigned char) branch_data->alpha[i] * 256;
-//            cout << "branch_data->alpha[" << i << "] = " << branch_data->alpha[i];
-//            cout <<"\ttf_arr[" << branch_data->label * 256 + i << "] = " << branch_data->alpha[i] * 256 << endl;
+            //            cout << "branch_data->alpha[" << i << "] = " << branch_data->alpha[i];
+            //            cout <<"\ttf_arr[" << branch_data->label * 256 + i << "] = " << branch_data->alpha[i] * 256 << endl;
         }
 
         for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
@@ -97,8 +97,8 @@ double opacity_max = 0.9;
 
 int main(int argc, char** argv)
 {
-    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
-    //    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
+    //    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
+    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
     //    std::string path = "/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8";
     //    std::string path = "/home/guilherme/Pictures/datasets/stent.512x512x174.uint8";
 
@@ -129,8 +129,8 @@ int main(int argc, char** argv)
     size_t max_depth = 0;
     calc_branch_depth(root_branch, &max_depth, 0);
 
-    //    cout << count_branches(root_branch) << " branches before simplification." << endl;
-    //    cout << "Tree depth = " << max_depth << endl;
+    cout << count_branches(root_branch) << " branches before simplification." << endl;
+    cout << "Tree depth = " << max_depth << endl;
 
     //    tbb::tick_count a = tbb::tick_count::now();
     calc_branch_features(branch_map, &data);
@@ -139,27 +139,35 @@ int main(int argc, char** argv)
 
     double avg_importance = calc_avg_importance(root_branch, &std_avg_importance);
     simplify_tree_dfs(root_branch, branch_map, data.totalSize, &std_avg_importance, avg_importance / 10000);
-//    outputTree(std::cout, root_branch);
+    //    outputTree(std::cout, root_branch);
     calc_branch_features(branch_map, &data);
     int last_label = label_branches(root_branch);
-//    outputTree(std::cout, root_branch);
-    save_vertex_branch_volume(branch_map, path + "-vtb", data.size[0], data.size[1], data.size[2]);
+    //    outputTree(std::cout, root_branch);
 
     calc_branch_num_children(root_branch);
 
     max_depth = 0;
     calc_branch_depth(root_branch, &max_depth, 0);
+    cout << count_branches(root_branch) << " branches after simplification." << endl;
     cout << "Tree depth = " << max_depth << "\nOpacity per depth level = " << opacity_max / max_depth << endl;
     normalize_features(root_branch);
 
-//    std::ofstream out_file;
-//    out_file.open(path + "-vtb");
-//    outputTree(out_file, root_branch);
-//    out_file.close();
+    //    std::ofstream out_file;
+    //    out_file.open(path + "-vtb");
+    //    outputTree(out_file, root_branch);
+    //    out_file.close();
 
     //calc_gsd(root_branch, &data);
     calc_residue_flow(root_branch, opacity_max / (double) max_depth, 300.0, &data);
-save_transfer_functions(root_branch, path + "-tf", last_label);
+
+    save_transfer_functions(root_branch,
+                            "/home/guilherme/Pictures/datasets/transfer-functions/hydrogenAtom." + std::to_string(count_branches(root_branch)) + ".uint8",
+                            last_label);
+
+    save_vertex_branch_volume(branch_map,
+                              "/home/guilherme/Pictures/datasets/vertex-branch-maps/hydrogenAtom.128x128x128.uint8",
+                              data.size[0], data.size[1], data.size[2]);
+
     ct_cleanup(ctx);
     free(root_branch);
     free(branch_map);

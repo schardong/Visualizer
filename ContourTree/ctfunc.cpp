@@ -7,6 +7,13 @@
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_reduce.h>
 
+static inline float clamp(float x, float a, float b)
+{
+
+    return x < a ? a : (x > b ? b : x);
+
+}
+
 size_t count_branches(ctBranch* b)
 {
     if(b == NULL) return 0;
@@ -108,25 +115,6 @@ void calc_branch_features(ctBranch** b_map, Data* data)
         else if(branch_data->max_intensity < data->data[i])
             branch_data->max_intensity = data->data[i];
     }
-
-    //    if(root_branch == NULL) return;
-
-    //    if(root_branch->data == NULL)
-    //        root_branch->data = (FeatureSet*) calloc(1, sizeof(FeatureSet));
-
-    //    FeatureSet* branch_data = (FeatureSet*) root_branch->data;
-    //    size_t* f = parallel_calc_vol_hypervol_branch(root_branch, b_map, data);
-
-    //    branch_data->v = f[0];
-    //    branch_data->hv = f[1];
-    //    branch_data->p = calc_persistence_branch(root_branch, data);
-    //    branch_data->c_s_min = 10000.0; //since maximum value is 255
-    //    branch_data->c_s_max = 0;
-    //    free(f); f = NULL;
-
-    //    for(ctBranch* c = root_branch->children.head; c!= NULL; c = c->nextChild) {
-    //        calc_branch_features(c, b_map, data);
-    //    }
 }
 
 void calc_branch_num_children(ctBranch* root_branch)
@@ -417,9 +405,9 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Dat
             std::cout << "["<< branch_data->depth << "] Dh: " << branch_data->delta_h << " Ai: " << branch_data->alpha_i << " r: "
                       << branch_data->delta_alpha_i << " Aij: " << branch_data->alpha_i_j << std::endl;
             //std::cout << branch_data->depth << " - " << branch_data->num_children << ", ";
-            branch_data->alpha_lo = calc_alpha_sum(curr_branch);
+            branch_data->alpha_lo = clamp(calc_alpha_sum(curr_branch), 0.f, 1.f);
 
-            branch_data->alpha_hi = calc_alpha_sum(curr_branch) + branch_data->alpha_i_j;
+            branch_data->alpha_hi = clamp(calc_alpha_sum(curr_branch) + branch_data->alpha_i_j, 0.f, 1.f);
 
             branch_data->alpha = calc_final_alpha(curr_branch, LINEAR);
             std::cout << "     Alo: " << branch_data->alpha_lo << " Ahi: " << branch_data->alpha_hi << /* " Imp: " << std_avg_importance(curr_branch) << */ std::endl;
@@ -463,10 +451,14 @@ double* calc_final_alpha(ctBranch* b, TFShape shape)
         break;
     case LINEAR:
     default:
-        double a = (b_data->alpha_hi - b_data->alpha_lo) / (b_data->max_intensity - b_data->min_intensity);
-        double b = b_data->alpha_hi - a * b_data->max_intensity;
-        for(size_t i = b_data->min_intensity; i < b_data->max_intensity; i++)
-            alpha_tf[i] = a * i + b;
+        if(b_data->min_intensity == b_data->max_intensity)
+            alpha_tf[b_data->min_intensity] = b_data->alpha_hi;
+        else {
+            double a = (b_data->alpha_hi - b_data->alpha_lo) / (b_data->max_intensity - b_data->min_intensity);
+            double b = b_data->alpha_hi - a * b_data->max_intensity;
+            for(size_t i = b_data->min_intensity; i <= b_data->max_intensity; i++)
+                alpha_tf[i] = a * i + b;
+        }
     }
     return alpha_tf;
 }
