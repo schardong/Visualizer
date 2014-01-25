@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     Logger::getInstance()->setLogStream(&std::cout);
-    Logger::getInstance()->log("Init");
+    Logger::getInstance()->log("Visualizer::Init");
 
     Ui::MainWindow w;
     w.setWindowTitle("3D Visualizer");

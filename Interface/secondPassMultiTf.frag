@@ -8,10 +8,8 @@ uniform sampler1D u_sColorTransferFunction;
 
 uniform sampler2D u_sBackFaces;
 
-
 uniform vec2 u_vScreenSize;
 uniform float u_fNumSamples;
-uniform int rayTMode;
 
 in vec3 ex_vEntryPoint;
 in vec4 ex_vExitPoint;
@@ -37,8 +35,8 @@ vec4 composite(Ray ray, vec3 step)
         float branch = texture(u_sVertexToBranchMap, currPos).r;
 
         vec4 color_sample;
-        color_sample.a = texture(u_sOpacityTransferFunction, vec2(branch, scalar_val));
-        color_sample.rgb = texture(u_sColorTransferFunction, scalar_val);
+        color_sample.a = texture(u_sOpacityTransferFunction, vec2(branch, scalar_val)).r;
+        color_sample.rgb = texture(u_sColorTransferFunction, scalar_val).rgb;
 
         color_sample = abs(color_sample);
         color_sample.a = clamp(color_sample.a, 0.f, 1.f);

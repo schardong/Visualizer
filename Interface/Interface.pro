@@ -17,12 +17,14 @@ SOURCES += \
     viewport.cpp \
     renderer.cpp \
     mainwindow.cpp \
-    main.cpp
+    main.cpp \
+    multidimrenderer.cpp
 
 HEADERS  += \
     viewport.h \
     renderer.h \
-    mainwindow.h
+    mainwindow.h \
+    multidimrenderer.h
 
 OTHER_FILES += \
     secondPass.vert \
