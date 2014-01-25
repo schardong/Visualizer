@@ -81,8 +81,26 @@ namespace ggraf
 
     void MultiDimVolumeData::loadColorTransferFunction(std::string path)
     {
-        Logger::getInstance()->warn("MultiDimVolumeData::loadColorTransferFunction(" +
-                                    path + ") not yet implemented");
+        Logger::getInstance()->log("ggraf::MultiDimVolumeData::loadColorTransferFunction(" + path + ")");
+        if(path.empty()) {
+            Logger::getInstance()->error("Invalid path provided, color transfer function not loaded.");
+            return;
+        }
+
+        ParsedTFPath* tfp = parseTFPath(path);
+
+        unsigned char* tf = ResourceManager::getInstance()->loadColorTransferFunction(tfp->path, tfp->bytes_per_pixel);
+
+        if(m_aTexIds[2] != 0) {
+            if(ggraf::ResourceManager::getInstance()->uploadColorTransferFuncData(tfp->bytes_per_pixel, tf, m_aTexIds[2]) == false) {
+                Logger::getInstance()->error("Failed to upload the transfer function to the GPU.");
+                return;
+            }
+        } else
+            m_aTexIds[2] = ggraf::ResourceManager::getInstance()->createColorTransferFuncTex(tfp->bytes_per_pixel, tf);
+
+        free(tf);
+        tf = NULL;
     }
 
     void MultiDimVolumeData::loadVertexToBranchMap(std::string path)

@@ -27,6 +27,21 @@ namespace ggraf
         virtual void loadOpacityTransferFunction(std::string path);
         virtual void loadColorTransferFunction(std::string path);
         virtual void loadVertexToBranchMap(std::string path);
+
+        virtual inline int getVertexBranchTexId()
+        {
+            return m_aTexIds[1];
+        }
+
+        virtual inline int getOpacityTransferFuncTexId()
+        {
+            return m_aTexIds[2];
+        }
+
+        virtual inline int getColorTransferFuncTexId()
+        {
+            return m_aTexIds[3];
+        }
     };
 
 }
