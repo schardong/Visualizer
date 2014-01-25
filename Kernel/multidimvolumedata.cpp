@@ -49,25 +49,24 @@ namespace ggraf
         glBindTexture(GL_TEXTURE_3D, 0);
         glDeleteTextures(1, &tex2);
 
-        glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
         glDeleteTextures(1, &tex3);
 
-        glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_1D, 0);
         glDeleteTextures(1, &tex4);
+
+        memset(m_aTexIds, 0, 4 * sizeof(int));
     }
 
     void MultiDimVolumeData::render()
     {
-
+        std::cout << m_aTexIds[0] << "\t" << m_aTexIds[1] << "\t" << m_aTexIds[2] << "\t" << m_aTexIds[3] << "\n";
     }
 
     void MultiDimVolumeData::loadOpacityTransferFunction(std::string path)
-    {/*
-        Logger::getInstance()->warn("MultiDimVolumeData::loadOpacityTransferFunction(" +
-                                    path + ") not yet implemented");*/
-
+    {
         Logger::getInstance()->log("ggraf::MultiDimVolumeData::loadOpacityTransferFunction(" + path + ")");
         if(path.empty()) {
             Logger::getInstance()->error("Invalid path provided, opacity transfer function not loaded.");
@@ -75,8 +74,20 @@ namespace ggraf
         }
 
         ParsedMultiDimTFPath* tfp = parseMultiDimTFPath(path);
+        std::cout << tfp->path << " " << tfp->w << "x" << tfp->h << " " << tfp->bytes_per_pixel << std::endl;
 
-//        unsigned char* tf_data = ggraf::ResourceManager::getInstance()->loadMultiDimensionalTransferFunction(tfp->path, tfp->w, tfp->h, tfp->bytes_per_pixel);
+        unsigned char* tf = ResourceManager::getInstance()->loadMultiDimensionalTransferFunction(tfp->path, tfp->w, tfp->h, tfp->bytes_per_pixel);
+
+        if(m_aTexIds[2] != 0) {
+            if(ggraf::ResourceManager::getInstance()->uploadMultiDimTransferFuncData(tfp->w, tfp->h, tfp->bytes_per_pixel, tf, m_aTexIds[2]) == false) {
+                Logger::getInstance()->error("Failed to upload the transfer function to the GPU.");
+                return;
+            }
+        } else
+            m_aTexIds[2] = ggraf::ResourceManager::getInstance()->createMultiDimTransferFuncTex(tfp->w, tfp->h, tfp->bytes_per_pixel, tf);
+
+        free(tf);
+        tf = NULL;
     }
 
     void MultiDimVolumeData::loadColorTransferFunction(std::string path)
@@ -143,12 +154,19 @@ namespace ggraf
             return NULL;
 
         ParsedMultiDimTFPath* tf = new ParsedMultiDimTFPath;
-        std::vector<std::string> strs;
+        std::vector<std::string> strs(3);
         boost::algorithm::split(strs, path, boost::is_any_of("."));
-        std::clog << strs[0] << " " << strs[1] << " " << strs[2] << std::endl;
 
         tf->path = path;
-        tf->bytes_per_pixel = strs.back() == "uint8" ? sizeof(GLubyte) : sizeof(GLushort);
+
+        if(strs.back() == "uint8") {
+            tf->bytes_per_pixel = sizeof(GLubyte);
+            tf->w = 256;
+        } else {
+            tf->bytes_per_pixel = sizeof(GLushort);
+            tf->w = 4096;
+        }
+        std::istringstream(strs[1]) >> tf->h;
 
         return tf;
     }

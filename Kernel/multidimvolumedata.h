@@ -14,7 +14,7 @@ namespace ggraf
         typedef struct
         {
             std::string path;
-            size_t w, h;
+            int w, h;
             size_t bytes_per_pixel;
         } ParsedMultiDimTFPath;
 

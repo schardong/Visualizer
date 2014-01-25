@@ -16,22 +16,22 @@ CONFIG += staticlib
 
 SOURCES += \
     volumedata.cpp \
+    multidimvolumedata.cpp\
     shader.cpp \
     resourcemanager.cpp \
     gl3w.c \
     kernel.cpp \
-    logger.cpp \
-    multidimvolumedata.cpp
+    logger.cpp
 
 HEADERS += \
     volumedata.h \
+    multidimvolumedata.h \
     singleton.h \
     shader.h \
     scene.h \
     resourcemanager.h \
     kernel.h \
-    logger.h \
-    multidimvolumedata.h
+    logger.h
 
 INCLUDEPATH += ../include
 

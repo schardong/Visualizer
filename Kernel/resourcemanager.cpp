@@ -55,6 +55,7 @@ namespace ggraf
             return 0;
         }
 
+//        fprintf(fp, "%s", contents);
         size_t bytes_written = fwrite(contents, bytes_per_element, num_elements, fp);
         fclose(fp);
         fp = nullptr;
@@ -62,9 +63,8 @@ namespace ggraf
         return bytes_written;
     }
 
-    void* ResourceManager::loadVolumeData(std::string filename, int w, int h, int slices, size_t bytes_per_pixel)
+    void* ResourceManager::loadVolumeData(std::string filename, size_t w, size_t h, size_t slices, size_t bytes_per_pixel)
     {
-//        FILE* fp;
         size_t num_voxels = w * h * slices;
 
         Logger::getInstance()->log("ggraf::ResourceManager::loadVolumeData(" +
@@ -77,7 +77,7 @@ namespace ggraf
         return loadRawFile(filename, num_voxels, bytes_per_pixel);
     }
 
-    void* ResourceManager::loadVertexToBranchMap(std::string filename, int w, int h, int slices)
+    void* ResourceManager::loadVertexToBranchMap(std::string filename, size_t w, size_t h, size_t slices)
     {
         size_t num_voxels = w * h * slices;
 
@@ -90,7 +90,7 @@ namespace ggraf
         return loadRawFile(filename, num_voxels, sizeof(unsigned int));
     }
 
-    size_t ResourceManager::saveVertexToBranchMap(std::string filename, int w, int h, int slices, unsigned int* branch_map)
+    size_t ResourceManager::saveVertexToBranchMap(std::string filename, size_t w, size_t h, size_t slices, unsigned int* branch_map)
     {
         size_t num_voxels = w * h * slices;
 
@@ -115,11 +115,11 @@ namespace ggraf
         return (unsigned char*) loadRawFile(filename, num_rgba, 1);
     }
 
-    unsigned char* loadMultiDimensionalTransferFunction(std::string filename, int w, int h, size_t bytes_per_pixel)
+    unsigned char* ResourceManager::loadMultiDimensionalTransferFunction(std::string filename, size_t w, size_t h, size_t bytes_per_pixel)
     {
         size_t num_pixels = w * h;
-        size_t num_rgba = bytes_per_pixel == sizeof(unsigned short) ? num_pixels * sizeof(unsigned short) * 4 :
-                                                                      num_pixels * sizeof(unsigned char) * 4;
+//        size_t num_rgba = bytes_per_pixel == sizeof(unsigned short) ? num_pixels * sizeof(unsigned short) * 4 :
+//                                                                      num_pixels * sizeof(unsigned char) * 4;
 
         Logger::getInstance()->log("ggraf::ResourceManager::loadMultiDimensionalTranferFunction(" +
                                    filename + ", " +
@@ -127,10 +127,10 @@ namespace ggraf
                                    std::to_string(h) + ", " +
                                    std::to_string(bytes_per_pixel) + ")");
 
-        return (unsigned char*) loadRawFile(filename, num_rgba, 1);
+        return (unsigned char*) loadRawFile(filename, num_pixels, bytes_per_pixel);
     }
 
-    size_t ResourceManager::saveMultiDimensionalTransferFunction(std::string filename, int w, int h, size_t bytes_per_pixel, void* tf_data)
+    size_t ResourceManager::saveMultiDimensionalTransferFunction(std::string filename, size_t w, size_t h, size_t bytes_per_pixel, void* tf_data)
     {
         size_t num_alpha = w * h;
 
@@ -143,7 +143,7 @@ namespace ggraf
         return saveRawFile(filename, num_alpha, bytes_per_pixel, tf_data);
     }
 
-    GLuint ResourceManager::createVolumeTex(int w, int h, int slices, size_t bytes_per_pixel, void* data)
+    GLuint ResourceManager::createVolumeTex(size_t w, size_t h, size_t slices, size_t bytes_per_pixel, void* data)
     {
         if(data == NULL)
             return 0;
@@ -181,6 +181,36 @@ namespace ggraf
         glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, file_size / 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glBindTexture(GL_TEXTURE_1D, 0);
         return tex;
+    }
+
+    GLuint ResourceManager::createMultiDimTransferFuncTex(size_t w, size_t h, size_t bytes_per_pixel, unsigned char* data)
+    {
+        GLuint tex;
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        return tex;
+
+//        size_t file_size = bytes_per_pixel == sizeof(GLushort) ? 4096 * 4 : 256 * 4;
+
+//        GLuint tex;
+//        glGenTextures(1, &tex);
+//        glBindTexture(GL_TEXTURE_1D, tex);
+//        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//        glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, file_size / 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+//        glBindTexture(GL_TEXTURE_1D, 0);
+//        return tex;
+
     }
 
     GLuint ResourceManager::createCubeVAO()
@@ -267,6 +297,20 @@ namespace ggraf
         glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, sz / 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
         glBindTexture(GL_TEXTURE_1D, 0);
+
+        return true;
+    }
+
+    bool ResourceManager::uploadMultiDimTransferFuncData(size_t w, size_t h, size_t bytes_per_pixel, unsigned char* data, GLuint texId)
+    {
+        if(texId == 0 || data == NULL)
+            return false;
+
+        glBindTexture(GL_TEXTURE_2D, texId);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
 
         return true;
     }
