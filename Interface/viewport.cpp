@@ -82,7 +82,7 @@ namespace Ui
         glDepthFunc(GL_LEQUAL);
         glClearColor(0.f, 0.f, 0.f, 1.f);
 
-        scene = new Renderer(width(), height());
+        scene = new MultiDimRenderer(width(), height());
         scene->init();
         timer->start(16);
     }

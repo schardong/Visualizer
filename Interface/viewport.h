@@ -3,6 +3,7 @@
 
 #include "kernel.h"
 #include "renderer.h"
+#include "multidimrenderer.h"
 #include <QGLWidget>
 
 namespace Ui
