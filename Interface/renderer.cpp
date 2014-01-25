@@ -28,6 +28,13 @@ Renderer::Renderer(int w, int h)
     vd = new ggraf::VolumeData("/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8",
                                "/home/guilherme/Pictures/datasets/transfer-functions/tff1.uint8");
 
+    ggraf::MultiDimVolumeData* test = new ggraf::MultiDimVolumeData("/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8",
+                                                                    "/home/guilherme/Pictures/datasets/vertex-branch-maps/nucleon.41x41x41.uint8",
+                                                                    "/home/guilherme/Pictures/datasets/transfer-functions/nucleon.6.uint8",
+                                                                    "/home/guilherme/Pictures/datasets/transfer-functions/nucleon.uint8");
+
+    test->render();
+    exit(0);
 
 }
 
