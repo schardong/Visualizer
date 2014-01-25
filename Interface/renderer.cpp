@@ -14,28 +14,30 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-Renderer::Renderer(int w, int h)
-    : width(w),
-      height(h)
+Renderer::Renderer()
+    : width(600),
+      height(600)
 {
     eye = glm::vec4(0, 0, 1.5, 1);
-    projMatrix = glm::perspective(fovy, static_cast<float>(w) / static_cast<float>(h), 0.1f, 10.f);
+    projMatrix = glm::perspective(fovy, static_cast<float>(width) / static_cast<float>(height), 0.1f, 10.f);
     viewMatrix = glm::lookAt(glm::vec3(eye), glm::vec3(0, 0, -0.1), glm::vec3(0, 1, 0));
     fboId = fboTexId = depthBuffId = 0;
     fovy = 45;
     numSamples = 256.f;
     mode = COM;
-    vd = new ggraf::VolumeData("/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8",
-                               "/home/guilherme/Pictures/datasets/transfer-functions/tff1.uint8");
+}
 
-    ggraf::MultiDimVolumeData* test = new ggraf::MultiDimVolumeData("/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8",
-                                                                    "/home/guilherme/Pictures/datasets/vertex-branch-maps/nucleon.41x41x41.uint8",
-                                                                    "/home/guilherme/Pictures/datasets/transfer-functions/nucleon.6.uint8",
-                                                                    "/home/guilherme/Pictures/datasets/transfer-functions/nucleon.uint8");
-
-    test->render();
-    exit(0);
-
+Renderer::Renderer(int w, int h)
+    : width(w),
+      height(h)
+{
+    eye = glm::vec4(0, 0, 1.5, 1);
+    projMatrix = glm::perspective(fovy, static_cast<float>(width) / static_cast<float>(height), 0.1f, 10.f);
+    viewMatrix = glm::lookAt(glm::vec3(eye), glm::vec3(0, 0, -0.1), glm::vec3(0, 1, 0));
+    fboId = fboTexId = depthBuffId = 0;
+    fovy = 45;
+    numSamples = 256.f;
+    mode = COM;
 }
 
 Renderer::~Renderer()

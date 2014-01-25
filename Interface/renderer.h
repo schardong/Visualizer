@@ -13,14 +13,16 @@ public:
         COM
     } RAY_TRANSVERSAL;
 
+    Renderer();
     Renderer(int w, int h);
     virtual ~Renderer();
 
-    void init();
-    void destroy();
-    void update();
-    void render();
-    void resize(int, int);
+    virtual void init();
+    virtual void destroy();
+    virtual void update();
+    virtual void render();
+    virtual void resize(int, int);
+
     void rotateCamera(glm::vec3, float);
     void loadVolume(std::string);
     void loadTransferFunction(std::string);
@@ -30,7 +32,7 @@ public:
     float getFovy();
     void setRayTransfersalMode(Renderer::RAY_TRANSVERSAL);
 
-private:
+protected:
     typedef enum
     {
         FIRST,
@@ -53,10 +55,14 @@ private:
 
     ggraf::Shader* fPass;
     ggraf::Shader* sPass;
+
+
+    virtual void loadUniforms(Renderer::SHADER_PASS);
+//    virtual void checkUniforms(Renderer::SHADER_PASS);
+
+private:
     ggraf::VolumeData* vd;
 
-    void loadUniforms(Renderer::SHADER_PASS);
-    void checkUniforms(Renderer::SHADER_PASS);
 };
 
 #endif // RENDERER_H
