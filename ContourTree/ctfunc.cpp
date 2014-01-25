@@ -409,7 +409,11 @@ void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Dat
 
             branch_data->alpha_hi = clamp(calc_alpha_sum(curr_branch) + branch_data->alpha_i_j, 0.f, 1.f);
 
-            branch_data->alpha = calc_final_alpha(curr_branch, LINEAR);
+            branch_data->alpha = (double*) calloc(256, sizeof(double));
+            double* tf = calc_final_alpha(curr_branch, LINEAR);
+            memcpy(branch_data->alpha, tf, 256 * sizeof(double));
+            free(tf);
+            tf = NULL;
             std::cout << "     Alo: " << branch_data->alpha_lo << " Ahi: " << branch_data->alpha_hi << /* " Imp: " << std_avg_importance(curr_branch) << */ std::endl;
             std::cout << "     Min scalar: " << branch_data->min_intensity << " Max scalar: " << branch_data->max_intensity << std::endl;
             std::cout << " Opacity: ";

@@ -1,8 +1,7 @@
 #ifndef FEATURESET_H
 #define FEATURESET_H
 
-#include <stdlib.h>
-#include <stdbool.h>
+#include <cstdlib>
 
 typedef struct
 {

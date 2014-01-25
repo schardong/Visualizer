@@ -19,6 +19,7 @@ extern "C"
 #include "ctfunc.h"
 #include "simplification.h"
 #include "resourcemanager.h"
+#include "logger.h"
 
 using std::cin;
 using std::cout;
@@ -75,11 +76,15 @@ void save_transfer_functions(ctBranch* root_branch, std::string filename, int nu
         branch_queue.pop();
 
         FeatureSet* branch_data = (FeatureSet*) curr_branch->data;
-        for(int i = 0; i < 256; i++) {
-            tf_arr[branch_data->label * 256 + i] = (unsigned char) branch_data->alpha[i] * 256;
-            //            cout << "branch_data->alpha[" << i << "] = " << branch_data->alpha[i];
-            //            cout <<"\ttf_arr[" << branch_data->label * 256 + i << "] = " << branch_data->alpha[i] * 256 << endl;
-        }
+
+        unsigned char tmp_tf[256];
+        memset(tmp_tf, 0, 256 * sizeof(unsigned char));
+        for(int i = 0; i < 256; i++)
+            tmp_tf[i] = static_cast<unsigned char>(branch_data->alpha[i] * 255);
+
+        unsigned char* tf_begin = tf_arr + branch_data->label * 256;
+        memcpy(tf_begin, tmp_tf, 256 * sizeof(unsigned char));
+        memset(tmp_tf, 0, 256 * sizeof(unsigned char));
 
         for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
             FeatureSet* c_data = (FeatureSet*) c->data;
@@ -90,6 +95,9 @@ void save_transfer_functions(ctBranch* root_branch, std::string filename, int nu
     } while(!branch_queue.empty());
 
     ggraf::ResourceManager::getInstance()->saveMultiDimensionalTransferFunction(filename, 256, num_tfs, sizeof(unsigned char), tf_arr);
+    memset(tf_arr, 0, num_tfs * 256 * sizeof(unsigned char));
+    free(tf_arr);
+    tf_arr = NULL;
 
 }
 
@@ -97,13 +105,15 @@ double opacity_max = 0.9;
 
 int main(int argc, char** argv)
 {
-    //    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
-    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
+    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
+    //    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
     //    std::string path = "/home/guilherme/Pictures/datasets/bonsai.256x256x256.uint8";
     //    std::string path = "/home/guilherme/Pictures/datasets/stent.512x512x174.uint8";
 
     //    std::string path = "/home/netto/datasets/hydrogenAtom.128x128x128.uint8";
     //    std::string path = "/home/netto/datasets/nucleon.41x41x41.uint8";
+
+    Logger::getInstance()->setLogStream(&std::cout);
 
     char prefix[1024];
     bool compressed;
@@ -161,11 +171,11 @@ int main(int argc, char** argv)
     calc_residue_flow(root_branch, opacity_max / (double) max_depth, 300.0, &data);
 
     save_transfer_functions(root_branch,
-                            "/home/guilherme/Pictures/datasets/transfer-functions/hydrogenAtom." + std::to_string(count_branches(root_branch)) + ".uint8",
+                            "/home/guilherme/Pictures/datasets/transfer-functions/nucleon." + std::to_string(count_branches(root_branch)) + ".uint8",
                             last_label);
 
     save_vertex_branch_volume(branch_map,
-                              "/home/guilherme/Pictures/datasets/vertex-branch-maps/hydrogenAtom.128x128x128.uint8",
+                              "/home/guilherme/Pictures/datasets/vertex-branch-maps/nucleon.41x41x41.uint8",
                               data.size[0], data.size[1], data.size[2]);
 
     ct_cleanup(ctx);
