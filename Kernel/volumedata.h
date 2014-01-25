@@ -24,6 +24,7 @@ namespace ggraf
             size_t bytes_per_pixel;
         } ParsedTFPath;
 
+        int* m_aTexIds;
         int m_iVaoId;
         glm::vec3 m_vDimensions;
         glm::vec3 m_vScaleFactor;
@@ -32,7 +33,7 @@ namespace ggraf
         ParsedVolPath* parseVolumePath(std::string path);
         ParsedTFPath* parseTFPath(std::string path);
     private:
-        int m_aTexIds[2];
+
         std::pair<size_t, size_t> m_dataTypes;
 
     public:
@@ -70,8 +71,8 @@ namespace ggraf
             return m_dataTypes;
         }
 
-        virtual void loadVolume(std::string path);
-        virtual void loadTransferFunction(std::string path);
+        void loadVolume(std::string path);
+        void loadTransferFunction(std::string path);
         void render();
     };
 }

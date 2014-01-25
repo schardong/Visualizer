@@ -55,7 +55,6 @@ namespace ggraf
             return 0;
         }
 
-//        fprintf(fp, "%s", contents);
         size_t bytes_written = fwrite(contents, bytes_per_element, num_elements, fp);
         fclose(fp);
         fp = nullptr;
@@ -118,8 +117,6 @@ namespace ggraf
     unsigned char* ResourceManager::loadMultiDimensionalTransferFunction(std::string filename, size_t w, size_t h, size_t bytes_per_pixel)
     {
         size_t num_pixels = w * h;
-//        size_t num_rgba = bytes_per_pixel == sizeof(unsigned short) ? num_pixels * sizeof(unsigned short) * 4 :
-//                                                                      num_pixels * sizeof(unsigned char) * 4;
 
         Logger::getInstance()->log("ggraf::ResourceManager::loadMultiDimensionalTranferFunction(" +
                                    filename + ", " +
@@ -143,8 +140,41 @@ namespace ggraf
         return saveRawFile(filename, num_alpha, bytes_per_pixel, tf_data);
     }
 
+    unsigned char* ResourceManager::loadColorTransferFunction(std::string filename, size_t bytes_per_pixel)
+    {
+        size_t num_rgb = bytes_per_pixel == sizeof(unsigned short) ? 4096 * 3:
+                                                                     256 * 3;
+
+        Logger::getInstance()->log("ggraf::ResourceManager::loadColorTransferFunction(" +
+                                   filename + ", " +
+                                   std::to_string(bytes_per_pixel) + ")");
+
+        return (unsigned char*) loadRawFile(filename, num_rgb, 1);
+
+    }
+
+    size_t ResourceManager::saveColorTransferFunction(std::string filename, size_t bytes_per_pixel, void* tf_data)
+    {
+
+        size_t num_rgb = bytes_per_pixel == sizeof(unsigned short) ? 4096 * 3:
+                                                                     256 * 3;
+
+        Logger::getInstance()->log("ggraf::ResourceManager::saveColorTransferFunction(" +
+                                   filename + ", " +
+                                   std::to_string(bytes_per_pixel) + ")");
+
+        return saveRawFile(filename, num_rgb, bytes_per_pixel, tf_data);
+
+    }
+
     GLuint ResourceManager::createVolumeTex(size_t w, size_t h, size_t slices, size_t bytes_per_pixel, void* data)
     {
+        Logger::getInstance()->log("ggraf::ResourceManager::createVolumeTex(" +
+                                   std::to_string(w) + ", " +
+                                   std::to_string(h) + ", " +
+                                   std::to_string(slices) + ", " +
+                                   std::to_string(bytes_per_pixel) + ")");
+
         if(data == NULL)
             return 0;
 
@@ -169,6 +199,9 @@ namespace ggraf
 
     GLuint ResourceManager::createTransferFuncTex(size_t bytes_per_pixel, unsigned char* data)
     {
+        Logger::getInstance()->log("ggraf::ResourceManager::createTransferFuncTex(" +
+                                   std::to_string(bytes_per_pixel) + ")");
+
         size_t file_size = bytes_per_pixel == sizeof(GLushort) ? 4096 * 4 : 256 * 4;
 
         GLuint tex;
@@ -185,6 +218,11 @@ namespace ggraf
 
     GLuint ResourceManager::createMultiDimTransferFuncTex(size_t w, size_t h, size_t bytes_per_pixel, unsigned char* data)
     {
+        Logger::getInstance()->log("ggraf::ResourceManager::createMultiDimTransferFuncTex(" +
+                                   std::to_string(w) + ", " +
+                                   std::to_string(h) + ", " +
+                                   std::to_string(bytes_per_pixel) + ")");
+
         GLuint tex;
         glGenTextures(1, &tex);
         glBindTexture(GL_TEXTURE_2D, tex);
@@ -197,19 +235,110 @@ namespace ggraf
         glBindTexture(GL_TEXTURE_2D, 0);
 
         return tex;
+    }
 
-//        size_t file_size = bytes_per_pixel == sizeof(GLushort) ? 4096 * 4 : 256 * 4;
+    GLuint ResourceManager::createColorTransferFuncTex(size_t bytes_per_pixel, unsigned char* data)
+    {
+        Logger::getInstance()->log("ggraf::ResourceManager::createColorTransferFuncTex(" +
+                                   std::to_string(bytes_per_pixel) + ")");
 
-//        GLuint tex;
-//        glGenTextures(1, &tex);
-//        glBindTexture(GL_TEXTURE_1D, tex);
-//        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-//        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-//        glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, file_size / 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-//        glBindTexture(GL_TEXTURE_1D, 0);
-//        return tex;
+        size_t file_size = bytes_per_pixel == sizeof(GLushort) ? 4096 * 3 : 256 * 3;
+
+        GLuint tex;
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_1D, tex);
+        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB8, file_size / 3, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glBindTexture(GL_TEXTURE_1D, 0);
+        return tex;
+    }
+
+    bool ResourceManager::uploadVolumeData(size_t w, size_t h, size_t slices, size_t bytes_per_pixel, void* data, GLuint texId)
+    {
+
+        Logger::getInstance()->log("ggraf::ResourceManager::uploadVolumeData(" +
+                                   std::to_string(w) + ", " +
+                                   std::to_string(h) + ", " +
+                                   std::to_string(slices) + ", " +
+                                   std::to_string(bytes_per_pixel) + ", " +
+                                   std::to_string(texId) + ")");
+
+        if(texId == 0 || data == NULL)
+            return false;
+
+        glBindTexture(GL_TEXTURE_3D, texId);
+
+        if(bytes_per_pixel == sizeof(GLushort))
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_UNSIGNED_SHORT, data);
+        else if(bytes_per_pixel == sizeof(GLubyte))
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+
+        glBindTexture(GL_TEXTURE_3D, 0);
+
+        return true;
+    }
+
+    bool ResourceManager::uploadTransferFuncData(size_t bytes_per_pixel, unsigned char* data, GLuint texId)
+    {
+        Logger::getInstance()->log("ggraf::ResourceManager::uploadTransferFuncData(" +
+                                   std::to_string(bytes_per_pixel) + ", " +
+                                   std::to_string(texId) + ")");
+
+        if(texId == 0 || data == NULL)
+            return false;
+
+        size_t sz = bytes_per_pixel == sizeof(GLushort) ? 4096 * 4 : 256 * 4;
+
+        glBindTexture(GL_TEXTURE_1D, texId);
+
+        glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, sz / 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+        glBindTexture(GL_TEXTURE_1D, 0);
+
+        return true;
+    }
+
+    bool ResourceManager::uploadMultiDimTransferFuncData(size_t w, size_t h, size_t bytes_per_pixel, unsigned char* data, GLuint texId)
+    {
+        Logger::getInstance()->log("ggraf::ResourceManager::uploadMultiDimTransferFuncData(" +
+                                   std::to_string(w) + ", " +
+                                   std::to_string(h) + ", " +
+                                   std::to_string(bytes_per_pixel) + ", " +
+                                   std::to_string(texId) + ")");
+
+        if(texId == 0 || data == NULL)
+            return false;
+
+        glBindTexture(GL_TEXTURE_2D, texId);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        return true;
+    }
+
+    bool ResourceManager::uploadColorTransferFuncData(size_t bytes_per_pixel, unsigned char* data, GLuint texId)
+    {
+        Logger::getInstance()->log("ggraf::ResourceManager::uploadColorTransferFuncData(" +
+                                   std::to_string(bytes_per_pixel) + ", " +
+                                   std::to_string(texId) + ")");
+
+        if(texId == 0 || data == NULL)
+            return false;
+
+        size_t sz = bytes_per_pixel == sizeof(GLushort) ? 4096 * 3 : 256 * 3;
+
+        glBindTexture(GL_TEXTURE_1D, texId);
+
+        glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB8, sz / 3, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+        glBindTexture(GL_TEXTURE_1D, 0);
+
+        return true;
 
     }
 
@@ -265,54 +394,6 @@ namespace ggraf
         glBindVertexArray(0);
 
         return vao;
-    }
-
-
-    bool ResourceManager::uploadVolumeData(int w, int h, int slices, size_t bytes_per_pixel, void* data, GLuint texId)
-    {
-        if(texId == 0 || data == NULL)
-            return false;
-
-        glBindTexture(GL_TEXTURE_3D, texId);
-
-        if(bytes_per_pixel == sizeof(GLushort))
-            glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_UNSIGNED_SHORT, data);
-        else if(bytes_per_pixel == sizeof(GLubyte))
-            glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_UNSIGNED_BYTE, data);
-
-        glBindTexture(GL_TEXTURE_3D, 0);
-
-        return true;
-    }
-
-    bool ResourceManager::uploadTransferFuncData(size_t bytes_per_pixel, unsigned char* data, GLuint texId)
-    {
-        if(texId == 0 || data == NULL)
-            return false;
-
-        size_t sz = bytes_per_pixel == sizeof(GLushort) ? 4096 * 4 : 256 * 4;
-
-        glBindTexture(GL_TEXTURE_1D, texId);
-
-        glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, sz / 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-        glBindTexture(GL_TEXTURE_1D, 0);
-
-        return true;
-    }
-
-    bool ResourceManager::uploadMultiDimTransferFuncData(size_t w, size_t h, size_t bytes_per_pixel, unsigned char* data, GLuint texId)
-    {
-        if(texId == 0 || data == NULL)
-            return false;
-
-        glBindTexture(GL_TEXTURE_2D, texId);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, data);
-
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        return true;
     }
 
     void ResourceManager::destroyCubeVao(GLuint cube_id)

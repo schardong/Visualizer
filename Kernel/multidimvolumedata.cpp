@@ -12,21 +12,16 @@ namespace ggraf
 {
 
     MultiDimVolumeData::MultiDimVolumeData()
-    {
-        std::memset(m_aTexIds, 0, 4 * sizeof(int));
-    }
+    {}
 
     MultiDimVolumeData::MultiDimVolumeData(std::string volume_path, std::string vtb_path, std::string opacity_tf_path, std::string color_tf_path)
     {
-        std::memset(m_aTexIds, 0, 4 * sizeof(int));
+        m_aTexIds = (int*) std::calloc(4, sizeof(int));
 
         loadVolume(volume_path);
         loadVertexToBranchMap(vtb_path);
         loadOpacityTransferFunction(opacity_tf_path);
         loadColorTransferFunction(color_tf_path);
-
-        Logger::getInstance()->warn(std::to_string(m_iVaoId) + " is the VAO id");
-
     }
 
     MultiDimVolumeData::~MultiDimVolumeData()
@@ -60,11 +55,6 @@ namespace ggraf
         memset(m_aTexIds, 0, 4 * sizeof(int));
     }
 
-    void MultiDimVolumeData::render()
-    {
-        std::cout << m_aTexIds[0] << "\t" << m_aTexIds[1] << "\t" << m_aTexIds[2] << "\t" << m_aTexIds[3] << "\n";
-    }
-
     void MultiDimVolumeData::loadOpacityTransferFunction(std::string path)
     {
         Logger::getInstance()->log("ggraf::MultiDimVolumeData::loadOpacityTransferFunction(" + path + ")");
@@ -74,7 +64,6 @@ namespace ggraf
         }
 
         ParsedMultiDimTFPath* tfp = parseMultiDimTFPath(path);
-        std::cout << tfp->path << " " << tfp->w << "x" << tfp->h << " " << tfp->bytes_per_pixel << std::endl;
 
         unsigned char* tf = ResourceManager::getInstance()->loadMultiDimensionalTransferFunction(tfp->path, tfp->w, tfp->h, tfp->bytes_per_pixel);
 
@@ -98,54 +87,34 @@ namespace ggraf
 
     void MultiDimVolumeData::loadVertexToBranchMap(std::string path)
     {
-        Logger::getInstance()->warn("MultiDimVolumeData::loadVertexToBranchMap(" +
-                                    path + ") not yet implemented");
-    }
+        Logger::getInstance()->log("ggraf::MultiDimVolumeData::loadVertexToBranchMap(" + path + ")");
 
-    /*Logger::getInstance()->log("ggraf::VolumeData::loadTransferFunction(" + path + ")");
         if(path.empty()) {
-            Logger::getInstance()->error("Invalid path provided, transfer function not loaded.");
+            Logger::getInstance()->error("Invalid path provided, vertex to branch map not loaded.");
             return;
         }
 
-        ParsedTFPath* tfp = parseTFPath(path);
+        ParsedVolPath* v = parseVolumePath(path);
 
-        unsigned char* tf = ggraf::ResourceManager::getInstance()->loadTransferFuncion(tfp->path, tfp->bytes_per_pixel);
+        void* voxels = ggraf::ResourceManager::getInstance()->loadVertexToBranchMap(v->path, v->dim[0], v->dim[1], v->dim[2]);
 
         if(m_aTexIds[1] != 0) {
-            if(ggraf::ResourceManager::getInstance()->uploadTransferFuncData(tfp->bytes_per_pixel, tf, m_aTexIds[1]) == false) {
-                Logger::getInstance()->error("Failed to upload the transfer function to the GPU.");
+            if(ggraf::ResourceManager::getInstance()->uploadVolumeData(v->dim[0], v->dim[1], v->dim[2], v->bytes_per_pixel, voxels, m_aTexIds[1]) == false) {
+                Logger::getInstance()->error("Failed to upload the vertex to branch map to the GPU.");
                 return;
             }
         } else
-            m_aTexIds[1] = ggraf::ResourceManager::getInstance()->createTransferFuncTex(tfp->bytes_per_pixel, tf);
+            m_aTexIds[1] = ggraf::ResourceManager::getInstance()->createVolumeTex(v->dim[0], v->dim[1], v->dim[2], v->bytes_per_pixel, voxels);
 
-        m_dataTypes.second = tfp->bytes_per_pixel;
+        m_vDimensions = glm::vec3(v->dim[0], v->dim[1], v->dim[2]);
+        m_vScaleFactor = glm::normalize(m_vDimensions);
 
-        free(tf);
-        tf = NULL;*/
+        m_mModelMatrix = glm::scale(glm::mat4(1.f), m_vScaleFactor);
+        m_mModelMatrix = glm::translate<float>(m_mModelMatrix, glm::vec3(-.5, -.5, -.5));
 
-    MultiDimVolumeData::ParsedVolPath* MultiDimVolumeData::parseVTBVolumePath(std::string path)
-    {
-        if(path.empty())
-            return NULL;
+        free(voxels);
+        voxels = NULL;
 
-        ParsedVolPath* v = new ParsedVolPath;
-        std::vector<std::string> strs;
-        boost::algorithm::split(strs, path, boost::is_any_of("."));
-
-        v->path = path;
-
-        v->bytes_per_pixel = strs[2] == "uint8" ? sizeof(GLubyte) : sizeof(GLushort);
-
-        std::vector<std::string> dims_strs;
-        boost::algorithm::split(dims_strs, strs[1], boost::is_any_of("x"));
-
-        std::istringstream(dims_strs[0]) >> v->dim[0];
-        std::istringstream(dims_strs[1]) >> v->dim[1];
-        std::istringstream(dims_strs[2]) >> v->dim[2];
-
-        return v;
     }
 
     MultiDimVolumeData::ParsedMultiDimTFPath* MultiDimVolumeData::parseMultiDimTFPath(std::string path)

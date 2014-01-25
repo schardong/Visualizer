@@ -9,7 +9,6 @@ namespace ggraf
     class MultiDimVolumeData : public ggraf::VolumeData
     {
     private:
-        int m_aTexIds[4];
 
         typedef struct
         {
@@ -18,7 +17,6 @@ namespace ggraf
             size_t bytes_per_pixel;
         } ParsedMultiDimTFPath;
 
-        ParsedVolPath* parseVTBVolumePath(std::string path);
         ParsedMultiDimTFPath* parseMultiDimTFPath(std::string path);
 
     public:
@@ -29,8 +27,6 @@ namespace ggraf
         virtual void loadOpacityTransferFunction(std::string path);
         virtual void loadColorTransferFunction(std::string path);
         virtual void loadVertexToBranchMap(std::string path);
-
-        virtual void render();
     };
 
 }

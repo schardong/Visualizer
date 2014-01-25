@@ -17,13 +17,12 @@ namespace ggraf
 {
     VolumeData::VolumeData()
     {
-        std::memset(m_aTexIds, 0, sizeof(int) * 2);
         m_iVaoId = ggraf::ResourceManager::getInstance()->createCubeVAO();
     }
 
     VolumeData::VolumeData(std::string volume_path, std::string tf_path)
     {
-        std::memset(m_aTexIds, 0, sizeof(int) * 2);
+        m_aTexIds = (int*) std::calloc(2, sizeof(int));
         loadVolume(volume_path);
         loadTransferFunction(tf_path);
 
@@ -46,6 +45,10 @@ namespace ggraf
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_1D, 0);
         glDeleteTextures(1, &tex2);
+
+        std::memset(m_aTexIds, 0, 2 * sizeof(int));
+        free(m_aTexIds);
+        m_aTexIds = NULL;
     }
 
     void VolumeData::render()
