@@ -1,19 +1,54 @@
 #include "multidimrenderer.h"
 
 MultiDimRenderer::MultiDimRenderer()
+    : width(600),
+      height(600)
 {
-    vd = new ggraf::MultiDimVolumeData("/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8",
-                                       "/home/guilherme/Pictures/datasets/vertex-branch-maps/nucleon.41x41x41.uint8",
-                                       "/home/guilherme/Pictures/datasets/transfer-functions/nucleon.6.uint8",
-                                       "/home/guilherme/Pictures/datasets/transfer-functions/color_tf1.uint8");
+    eye = glm::vec4(0, 0, 1.5, 1);
+    projMatrix = glm::perspective(fovy, static_cast<float>(width) / static_cast<float>(height), 0.1f, 10.f);
+    viewMatrix = glm::lookAt(glm::vec3(eye), glm::vec3(0, 0, -0.1), glm::vec3(0, 1, 0));
+    fboId = fboTexId = depthBuffId = 0;
+    fovy = 45;
+    numSamples = 256.f;
+    mode = COM;
 }
 
-MultiDimRenderer::MultiDimRenderer(int w, int h) : Renderer(w, h)
+MultiDimRenderer::MultiDimRenderer(int w, int h)
+    : width(w),
+      height(h)
 {
-    vd = new ggraf::MultiDimVolumeData("/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8",
-                                       "/home/guilherme/Pictures/datasets/vertex-branch-maps/nucleon.41x41x41.uint8",
-                                       "/home/guilherme/Pictures/datasets/transfer-functions/nucleon.6.uint8",
-                                       "/home/guilherme/Pictures/datasets/transfer-functions/color_tf1.uint8");
+    eye = glm::vec4(0, 0, 1.5, 1);
+    projMatrix = glm::perspective(fovy, static_cast<float>(width) / static_cast<float>(height), 0.1f, 10.f);
+    viewMatrix = glm::lookAt(glm::vec3(eye), glm::vec3(0, 0, -0.1), glm::vec3(0, 1, 0));
+    fboId = fboTexId = depthBuffId = 0;
+    fovy = 45;
+    numSamples = 256.f;
+    mode = COM;
+}
+
+MultiDimRenderer::~MultiDimRenderer()
+{
+    if(vd != NULL) {
+        delete vd;
+        vd = NULL;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDeleteTextures(1, &fboTexId);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glDeleteRenderbuffers(1, &depthBuffId);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(1, &fboId);
+
+    eye = glm::vec4(0, 0, 0, 0);
+    projMatrix = glm::mat4();
+    viewMatrix = glm::mat4();
+
+    ggraf::Shader::unbind();
+    delete fPass;
+    delete sPass;
 }
 
 void MultiDimRenderer::init()
@@ -76,6 +111,79 @@ void MultiDimRenderer::init()
     sPass->bind();
     sPass->bindFragDataLoc("out_vColor", 0);
     ggraf::Shader::unbind();
+
+    vd = new ggraf::MultiDimVolumeData("/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8",
+                                       "/home/guilherme/Pictures/datasets/vertex-branch-maps/hydrogenAtom.128x128x128.float",
+                                       "/home/guilherme/Pictures/datasets/transfer-functions/hydrogenAtom.14.uint8",
+                                       "/home/guilherme/Pictures/datasets/transfer-functions/color_tf3.uint8");
+}
+
+void MultiDimRenderer::destroy() {}
+
+void MultiDimRenderer::update()
+{
+    fPass->bind();
+    loadUniforms(FIRST);
+
+    sPass->bind();
+    loadUniforms(SECOND);
+
+    ggraf::Shader::unbind();
+}
+
+void MultiDimRenderer::render()
+{
+    if((mode == RAY_TRANSVERSAL::COM && checkDataTypes())
+            || mode == RAY_TRANSVERSAL::AVG
+            || mode == RAY_TRANSVERSAL::MIP) {
+        fPass->bind();
+        glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+        vd->render();
+        glDisable(GL_CULL_FACE);
+        ggraf::Shader::unbind();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, width, height);
+
+        sPass->bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        vd->render();
+        glDisable(GL_CULL_FACE);
+        ggraf::Shader::unbind();
+    } else {
+        glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+}
+
+void MultiDimRenderer::resize(int w, int h)
+{
+    width = w;
+    height = h;
+    glViewport(0, 0, w, h);
+    projMatrix = glm::perspective(fovy, static_cast<float>(w) / static_cast<float>(h), 0.1f, 10.f);
+}
+
+void MultiDimRenderer::loadVolume(std::string path)
+{
+    Logger::getInstance()->log("MultiDimRenderer::loadVolume(" + path + ")");
+
+    if(path.empty()) {
+        Logger::getInstance()->error("Invalid path provided. Volume not loaded.");
+        return;
+    }
+
+    vd->loadVolume(path);
 }
 
 void MultiDimRenderer::loadVertexBranchMap(std::string path)
@@ -114,6 +222,11 @@ void MultiDimRenderer::loadColorTransferFuntcion(std::string path)
     vd->loadColorTransferFunction(path);
 }
 
+void MultiDimRenderer::rotateCamera(glm::vec3 axis, float speed)
+{
+    viewMatrix = glm::rotate(viewMatrix, speed, axis);
+}
+
 void MultiDimRenderer::loadUniforms(MultiDimRenderer::SHADER_PASS p)
 {
     if(vd->isVolumeLoaded() && vd->isTfLoaded()) {
@@ -146,7 +259,6 @@ void MultiDimRenderer::loadUniforms(MultiDimRenderer::SHADER_PASS p)
 
             s->setUniformfv("u_vScreenSize", screenSize, 2);
             s->setUniform1f("u_fNumSamples", numSamples);
-//            s->setUniform1i("rayTMode", mode);
         }
 
         s->setUniformMatrix("u_mProjectionMatrix", projMatrix);
@@ -155,7 +267,31 @@ void MultiDimRenderer::loadUniforms(MultiDimRenderer::SHADER_PASS p)
     }
 }
 
-//void MultiDimRenderer::checkUniforms(MultiDimRenderer::SHADER_PASS pass)
-//{
+void MultiDimRenderer::setNumSamples(float n)
+{
+    if(n > 0.f)
+        numSamples = n;
+}
 
-//}
+float MultiDimRenderer::getNumSamples()
+{
+    return numSamples;
+}
+
+void MultiDimRenderer::setFovy(float n)
+{
+    if(n > 0.f && fovy < 85.f) {
+        fovy = n;
+        projMatrix = glm::perspective(fovy, static_cast<float>(width) / static_cast<float>(height), 0.1f, 10.f);
+    }
+}
+
+float MultiDimRenderer::getFovy()
+{
+    return fovy;
+}
+
+void MultiDimRenderer::setRayTransfersalMode(MultiDimRenderer::RAY_TRANSVERSAL rtm)
+{
+    mode = rtm;
+}

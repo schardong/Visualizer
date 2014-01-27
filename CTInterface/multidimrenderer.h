@@ -1,11 +1,11 @@
-#ifndef RENDERER_H
-#define RENDERER_H
+#ifndef MULTIDIMRENDERER_H
+#define MULTIDIMRENDERER_H
 
 #include "kernel.h"
 
-class Renderer : public Scene
+class MultiDimRenderer
 {
-public:    
+public:
     typedef enum
     {
         MIP,
@@ -13,9 +13,9 @@ public:
         COM
     } RAY_TRANSVERSAL;
 
-    Renderer();
-    Renderer(int w, int h);
-    virtual ~Renderer();
+    MultiDimRenderer();
+    MultiDimRenderer(int, int);
+    virtual ~MultiDimRenderer();
 
     virtual void init();
     virtual void destroy();
@@ -23,14 +23,17 @@ public:
     virtual void render();
     virtual void resize(int, int);
 
-    void rotateCamera(glm::vec3, float);
     void loadVolume(std::string);
-    void loadTransferFunction(std::string);
+    void loadVertexBranchMap(std::string);
+    void loadOpacityTransferFunction(std::string);
+    void loadColorTransferFuntcion(std::string);
+
+    void rotateCamera(glm::vec3, float);
     void setNumSamples(float);
     float getNumSamples();
     void setFovy(float);
     float getFovy();
-    void setRayTransfersalMode(Renderer::RAY_TRANSVERSAL);
+    void setRayTransfersalMode(MultiDimRenderer::RAY_TRANSVERSAL);
 
 protected:
     typedef enum
@@ -42,7 +45,7 @@ protected:
     GLuint fboId;
     GLuint fboTexId;
     GLuint depthBuffId;
-    Renderer::RAY_TRANSVERSAL mode;
+    MultiDimRenderer::RAY_TRANSVERSAL mode;
 
     glm::vec4 eye;
     glm::mat4 projMatrix;
@@ -56,17 +59,15 @@ protected:
     ggraf::Shader* fPass;
     ggraf::Shader* sPass;
 
-    virtual void loadUniforms(Renderer::SHADER_PASS);
-//    virtual void checkUniforms(Renderer::SHADER_PASS);
+    void loadUniforms(MultiDimRenderer::SHADER_PASS);
 
 private:
-    ggraf::VolumeData* vd;
+    ggraf::MultiDimVolumeData* vd;
 
     virtual inline bool checkDataTypes()
     {
-        return (vd->getDataTypes()[0] == vd->getDataTypes()[1]);
+        return ((vd->getDataTypes()[0] == vd->getDataTypes()[2]) == vd->getDataTypes()[3]);
     }
-
 };
 
-#endif // RENDERER_H
+#endif // MULTIDIMRENDERER_H

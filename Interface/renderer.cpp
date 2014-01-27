@@ -42,7 +42,10 @@ Renderer::Renderer(int w, int h)
 
 Renderer::~Renderer()
 {
-    delete vd;
+    if(vd != NULL) {
+        delete vd;
+        vd = NULL;
+    }
 
     glBindTexture(GL_TEXTURE_2D, 0);
     glDeleteTextures(1, &fboTexId);
@@ -121,6 +124,8 @@ void Renderer::init()
     sPass->bind();
     sPass->bindFragDataLoc("out_vColor", 0);
     ggraf::Shader::unbind();
+
+    vd = new ggraf::VolumeData();
 }
 
 void Renderer::destroy() {}
@@ -138,7 +143,7 @@ void Renderer::update()
 
 void Renderer::render()
 {
-    if(mode == RAY_TRANSVERSAL::COM && vd->getDataTypes().first == vd->getDataTypes().second
+    if(mode == RAY_TRANSVERSAL::COM && checkDataTypes()
             || mode == RAY_TRANSVERSAL::AVG
             || mode == RAY_TRANSVERSAL::MIP) {
         fPass->bind();

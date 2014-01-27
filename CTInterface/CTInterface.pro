@@ -1,34 +1,28 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2013-11-10T03:41:04
-#
-#-------------------------------------------------
-
 QT       += core gui opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 QMAKE_CXXFLAGS += -std=c++11 -MMD
 
-TARGET = Interface
+TARGET = CTInterface
 TEMPLATE = app
 
 SOURCES += \
     viewport.cpp \
-    renderer.cpp \
+    multidimrenderer.cpp \
     mainwindow.cpp \
     main.cpp
 
 HEADERS  += \
-    viewport.h \
-    renderer.h \
-    mainwindow.h
+    mainwindow.h \
+    multidimrenderer.h \
+    viewport.h
 
 OTHER_FILES += \
-    secondPass.vert \
-    secondPass.frag \
+    firstPass.frag \
     firstPass.vert \
-    firstPass.frag
+    secondPassMultiTf.frag \
+    secondPass.vert
 
 INCLUDEPATH += ../include
 

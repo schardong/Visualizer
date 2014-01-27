@@ -1,7 +1,7 @@
 #include "GL3/gl3w.h"
 #include "viewport.h"
 #include "scene.h"
-#include "renderer.h"
+#include "multidimrenderer.h"
 #include "contourtree.h"
 
 #include <QTimer>
@@ -43,10 +43,31 @@ namespace Ui
         timer->start(16);
     }
 
-    void Viewport::loadTransferFuncion(std::string path)
+    void Viewport::loadVertexBranchMap(std::string)
     {
         timer->stop();
-        scene->loadTransferFunction(path);
+        Logger::getInstance()->warn("void Viewport::loadVertexBranchMap is not fully implemented yet!");
+        timer->start(16);
+    }
+
+    void Viewport::loadOpacityTransferFunction(std::string)
+    {
+        timer->stop();
+        Logger::getInstance()->warn("void Viewport::loadOpacityTransferFunction is not fully implemented yet!");
+        timer->start(16);
+    }
+
+    void Viewport::loadColorTransferFunction(std::string)
+    {
+        timer->stop();
+        Logger::getInstance()->warn("void Viewport::loadColorTransferFunction is not fully implemented yet!");
+        timer->start(16);
+    }
+
+    void Viewport::buildContourTree()
+    {
+        timer->stop();
+        Logger::getInstance()->warn("void Viewport::buildContourTree is not fully implemented yet!");
         timer->start(16);
     }
 
@@ -60,7 +81,7 @@ namespace Ui
         return scene->getNumSamples();
     }
 
-    void Viewport::setRayTransversalMode(Renderer::RAY_TRANSVERSAL rtm)
+    void Viewport::setRayTransversalMode(MultiDimRenderer::RAY_TRANSVERSAL rtm)
     {
         scene->setRayTransfersalMode(rtm);
     }
@@ -77,10 +98,8 @@ namespace Ui
         glDepthFunc(GL_LEQUAL);
         glClearColor(0.f, 0.f, 0.f, 1.f);
 
-        scene = new Renderer(width(), height());
+        scene = new MultiDimRenderer(width(), height());
         scene->init();
-        scene->loadVolume("/home/guilherme/Pictures/datasets/foot.256x256x256.uint8");
-        scene->loadTransferFunction("/home/guilherme/Pictures/datasets/transfer-functions/tff1.uint8");
         timer->start(16);
     }
 

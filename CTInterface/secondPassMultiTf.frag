@@ -15,6 +15,7 @@ in vec3 ex_vEntryPoint;
 in vec4 ex_vExitPoint;
 
 layout(location = 0) out vec4 out_vColor;
+layout(location = 1) out vec4 out_vColor_test;
 
 struct Ray
 {
@@ -42,11 +43,13 @@ vec4 composite(Ray ray, vec3 step)
         color_sample.a = clamp(color_sample.a, 0.f, 1.f);
 
         color_sample.rgb *= color_sample.a;
+
         colorAcc = (1.f - colorAcc.a) * color_sample + colorAcc;
 
-        if(colorAcc.a >= 0.9)
+        if(colorAcc.a >= 0.95)
             break;
 
+//        colorAcc.rgb = vec3(branch, branch, branch);
     }
 
     return colorAcc;
@@ -62,5 +65,6 @@ void main(void)
 
     Ray ray = Ray(ex_vEntryPoint, normalize(exitPoint - ex_vEntryPoint));
     vec3 step = ray.direction * sqrt(3.f) / u_fNumSamples;
-    out_vColor = composite(ray, step);
+    out_vColor = composite(ray, step);//ray.origin;
+    out_vColor_test = composite(ray, step);
 }

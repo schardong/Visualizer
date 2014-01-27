@@ -2,7 +2,7 @@
 #define VIEWPORT_H
 
 #include "kernel.h"
-#include "renderer.h"
+#include "multidimrenderer.h"
 #include <QGLWidget>
 
 namespace Ui
@@ -13,7 +13,7 @@ namespace Ui
         Q_OBJECT
     private:
         QTimer* timer;
-        Renderer* scene;
+        MultiDimRenderer* scene;
 
         glm::vec2 mousePressLoc;
         glm::vec3 rotAxis;
@@ -24,11 +24,15 @@ namespace Ui
         ~Viewport();
 
         void loadVolume(std::string);
-        void loadTransferFuncion(std::string);
+        void loadVertexBranchMap(std::string);
+        void loadOpacityTransferFunction(std::string);
+        void loadColorTransferFunction(std::string);
+
+        void buildContourTree();
+
         void setNumSamples(float);
         float getNumSamples();
-        void setRayTransversalMode(Renderer::RAY_TRANSVERSAL);
-        void buildContourTree();
+        void setRayTransversalMode(MultiDimRenderer::RAY_TRANSVERSAL);
 
     protected:
         void initializeGL();
