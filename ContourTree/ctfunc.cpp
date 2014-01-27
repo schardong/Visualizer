@@ -535,9 +535,7 @@ size_t save_vertex_branch_volume(ctBranch** branch_map, std::string filename, si
     for(size_t i = 0; i < num_elements; i++) {
         FeatureSet* branch_data = (FeatureSet*) branch_map[i]->data;
         branch_vol[i] = (float) branch_data->label;
-//        std::cout << branch_data->label << " ";
     }
-//                     std::cout << std::endl;
 
     for(size_t i = 0; i < num_elements; i++)
         if(branch_vol[i] != 0)

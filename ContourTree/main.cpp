@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <tbb/tbb.h>
+#include <set>
 
 extern "C" 
 {
@@ -66,8 +67,9 @@ double opacity_max = 0.9;
 
 int main(int argc, char** argv)
 {
-    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
-    //std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
+//    std::string path = "/home/guilherme/Pictures/datasets/marschnerlobb.41x41x41.uint8";
+//    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
+//    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
     //std::string path = "/home/guilherme/Pictures/datasets/foot.256x256x256.uint8";
     //std::string path = "/home/guilherme/Pictures/datasets/stent.512x512x174.uint8";
 
@@ -110,9 +112,9 @@ int main(int argc, char** argv)
 
     double avg_importance = calc_avg_importance(root_branch, &std_avg_importance);
     simplify_tree_dfs(root_branch, branch_map, data.totalSize, &std_avg_importance, avg_importance / 10000);
-    //    outputTree(std::cout, root_branch);
     calc_branch_features(branch_map, &data);
     int last_label = label_branches(root_branch);
+    outputTree(std::cout, root_branch);
 
     calc_branch_num_children(root_branch);
 
@@ -125,12 +127,18 @@ int main(int argc, char** argv)
     calc_residue_flow(root_branch, opacity_max / (double) max_depth, 300.0, &data);
 
     save_transfer_functions(root_branch,
-                            "/home/guilherme/Pictures/datasets/transfer-functions/nucleon." + std::to_string(count_branches(root_branch)) + ".uint8",
+                            "/home/guilherme/Pictures/datasets/transfer-functions/hydrogenAtom." + std::to_string(count_branches(root_branch)) + ".uint8",
                             last_label);
 
     save_vertex_branch_volume(branch_map,
-                              "/home/guilherme/Pictures/datasets/vertex-branch-maps/nucleon.41x41x41.float",
+                              "/home/guilherme/Pictures/datasets/vertex-branch-maps/hydrogenAtom.128x128x128.float",
                               data.size[0], data.size[1], data.size[2]);
+
+//    std::set<ctBranch*> test_set;
+//    for(int i = 0; i < data.totalSize; i++)
+//        test_set.insert(branch_map[i]);
+
+//    cout << test_set.size() << endl;
 
     ct_cleanup(ctx);
     free(root_branch);

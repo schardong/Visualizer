@@ -47,9 +47,9 @@ void mark_for_removal(ctBranch* root_branch, ctBranch** branch_map, size_t data_
         importance_measure(root_branch) > threshold ? branch_data->remove = false : branch_data->remove = true;
         //TODO: Associate the vertices with the parent branch
         for(size_t i = 0; i < data_size; i++) {
-            if(branch_map[i] == root_branch && root_branch->parent != NULL) {
-                branch_map[i] = root_branch->parent;
-            }
+//            if(branch_map[i] == root_branch && root_branch->parent != NULL) {
+//                branch_map[i] = root_branch->parent;
+//            }
         }
     }
 }
