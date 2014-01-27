@@ -17,12 +17,16 @@ namespace ggraf
 {
     VolumeData::VolumeData()
     {
+        m_aTexIds = std::vector<int>(2);
+        m_dataTypes = std::vector<size_t>(2);
         m_iVaoId = ggraf::ResourceManager::getInstance()->createCubeVAO();
     }
 
     VolumeData::VolumeData(std::string volume_path, std::string tf_path)
     {
-        m_aTexIds = (int*) std::calloc(2, sizeof(int));
+        m_aTexIds = std::vector<int>(2);
+        m_dataTypes = std::vector<size_t>(2);
+
         loadVolume(volume_path);
         loadTransferFunction(tf_path);
 
@@ -45,10 +49,6 @@ namespace ggraf
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_1D, 0);
         glDeleteTextures(1, &tex2);
-
-        std::memset(m_aTexIds, 0, 2 * sizeof(int));
-        free(m_aTexIds);
-        m_aTexIds = NULL;
     }
 
     void VolumeData::render()
@@ -79,7 +79,7 @@ namespace ggraf
         } else
             m_aTexIds[0] = ggraf::ResourceManager::getInstance()->createVolumeTex(v->dim[0], v->dim[1], v->dim[2], v->bytes_per_pixel, voxels);
 
-        m_dataTypes.first = v->bytes_per_pixel;
+        m_dataTypes[0] = v->bytes_per_pixel;
 
         m_vDimensions = glm::vec3(v->dim[0], v->dim[1], v->dim[2]);
         m_vScaleFactor = glm::normalize(m_vDimensions);
@@ -111,7 +111,7 @@ namespace ggraf
         } else
             m_aTexIds[1] = ggraf::ResourceManager::getInstance()->createTransferFuncTex(tfp->bytes_per_pixel, tf);
 
-        m_dataTypes.second = tfp->bytes_per_pixel;
+        m_dataTypes[1] = tfp->bytes_per_pixel;
 
         free(tf);
         tf = NULL;
@@ -128,7 +128,9 @@ namespace ggraf
 
         v->path = path;
 
-        v->bytes_per_pixel = strs[2] == "uint8" ? sizeof(GLubyte) : sizeof(GLushort);
+        v->bytes_per_pixel = strs[2] == "uint8" ? sizeof(GLubyte) :
+                                                  (strs[2] == "uint32" ? sizeof(GLuint) :
+                                                                         (strs[2] == "float" ? sizeof(GLfloat) : sizeof(GLushort)));
 
         std::vector<std::string> dims_strs;
         boost::algorithm::split(dims_strs, strs[1], boost::is_any_of("x"));

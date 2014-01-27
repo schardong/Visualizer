@@ -1,9 +1,11 @@
 #ifndef VOLUMEDATA_H
 #define VOLUMEDATA_H
 
+#include "transferfunction.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <string>
+#include <vector>
 
 namespace ggraf
 {
@@ -24,17 +26,16 @@ namespace ggraf
             size_t bytes_per_pixel;
         } ParsedTFPath;
 
-        int* m_aTexIds;
+        std::vector<int> m_aTexIds;
         int m_iVaoId;
         glm::vec3 m_vDimensions;
         glm::vec3 m_vScaleFactor;
         glm::mat4 m_mModelMatrix;
 
+        std::vector<size_t> m_dataTypes;
+
         ParsedVolPath* parseVolumePath(std::string path);
         ParsedTFPath* parseTFPath(std::string path);
-    private:
-
-        std::pair<size_t, size_t> m_dataTypes;
 
     public:
         VolumeData();
@@ -66,7 +67,7 @@ namespace ggraf
             return m_aTexIds[1] == 0? false : true;
         }
 
-        virtual inline std::pair<size_t, size_t> getDataTypes()
+        virtual inline std::vector<size_t> getDataTypes()
         {
             return m_dataTypes;
         }

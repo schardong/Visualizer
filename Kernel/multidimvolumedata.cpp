@@ -16,7 +16,8 @@ namespace ggraf
 
     MultiDimVolumeData::MultiDimVolumeData(std::string volume_path, std::string vtb_path, std::string opacity_tf_path, std::string color_tf_path)
     {
-        m_aTexIds = (int*) std::calloc(4, sizeof(int));
+        m_aTexIds = std::vector<int>(4);
+        m_dataTypes = std::vector<size_t>(4);
 
         loadVolume(volume_path);
         loadVertexToBranchMap(vtb_path);
@@ -51,8 +52,6 @@ namespace ggraf
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_1D, 0);
         glDeleteTextures(1, &tex4);
-
-        memset(m_aTexIds, 0, 4 * sizeof(int));
     }
 
     void MultiDimVolumeData::loadOpacityTransferFunction(std::string path)
@@ -75,6 +74,8 @@ namespace ggraf
         } else
             m_aTexIds[2] = ggraf::ResourceManager::getInstance()->createMultiDimTransferFuncTex(tfp->w, tfp->h, tfp->bytes_per_pixel, tf);
 
+        m_dataTypes[2] = tfp->bytes_per_pixel;
+
         free(tf);
         tf = NULL;
     }
@@ -91,13 +92,15 @@ namespace ggraf
 
         unsigned char* tf = ResourceManager::getInstance()->loadColorTransferFunction(tfp->path, tfp->bytes_per_pixel);
 
-        if(m_aTexIds[2] != 0) {
-            if(ggraf::ResourceManager::getInstance()->uploadColorTransferFuncData(tfp->bytes_per_pixel, tf, m_aTexIds[2]) == false) {
+        if(m_aTexIds[3] != 0) {
+            if(ggraf::ResourceManager::getInstance()->uploadColorTransferFuncData(tfp->bytes_per_pixel, tf, m_aTexIds[3]) == false) {
                 Logger::getInstance()->error("Failed to upload the transfer function to the GPU.");
                 return;
             }
         } else
-            m_aTexIds[2] = ggraf::ResourceManager::getInstance()->createColorTransferFuncTex(tfp->bytes_per_pixel, tf);
+            m_aTexIds[3] = ggraf::ResourceManager::getInstance()->createColorTransferFuncTex(tfp->bytes_per_pixel, tf);
+
+        m_dataTypes[3] = tfp->bytes_per_pixel;
 
         free(tf);
         tf = NULL;
@@ -114,16 +117,17 @@ namespace ggraf
 
         ParsedVolPath* v = parseVolumePath(path);
 
-        void* voxels = ggraf::ResourceManager::getInstance()->loadVertexToBranchMap(v->path, v->dim[0], v->dim[1], v->dim[2]);
+        float* voxels = ggraf::ResourceManager::getInstance()->loadVertexToBranchMap(v->path, v->dim[0], v->dim[1], v->dim[2]);
 
         if(m_aTexIds[1] != 0) {
-            if(ggraf::ResourceManager::getInstance()->uploadVolumeData(v->dim[0], v->dim[1], v->dim[2], v->bytes_per_pixel, voxels, m_aTexIds[1]) == false) {
+            if(ggraf::ResourceManager::getInstance()->uploadVertexBranchData(v->dim[0], v->dim[1], v->dim[2], voxels, m_aTexIds[1]) == false) {
                 Logger::getInstance()->error("Failed to upload the vertex to branch map to the GPU.");
                 return;
             }
         } else
-            m_aTexIds[1] = ggraf::ResourceManager::getInstance()->createVolumeTex(v->dim[0], v->dim[1], v->dim[2], v->bytes_per_pixel, voxels);
+            m_aTexIds[1] = ggraf::ResourceManager::getInstance()->createVertexBranchTex(v->dim[0], v->dim[1], v->dim[2], voxels);
 
+        m_dataTypes[1] = v->bytes_per_pixel;
         m_vDimensions = glm::vec3(v->dim[0], v->dim[1], v->dim[2]);
         m_vScaleFactor = glm::normalize(m_vDimensions);
 

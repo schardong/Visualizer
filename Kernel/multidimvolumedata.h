@@ -42,6 +42,21 @@ namespace ggraf
         {
             return m_aTexIds[3];
         }
+
+        virtual inline bool isVertexBranchMapLoaded()
+        {
+            return m_aTexIds[1] == 0? false : true;
+        }
+
+        virtual inline bool isOpacityTfLoaded()
+        {
+            return m_aTexIds[2] == 0? false : true;
+        }
+
+        virtual inline bool isColorTfLoaded()
+        {
+            return m_aTexIds[3] == 0? false : true;
+        }
     };
 
 }
