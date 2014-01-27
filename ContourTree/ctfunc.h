@@ -33,7 +33,7 @@ int label_branches(ctBranch*);
  */
 void zero_branches(ctBranch*);
 size_t save_vertex_branch_volume(ctBranch**, std::string, size_t, size_t, size_t);
-
+void save_transfer_functions(ctBranch*, std::string, int);
 
 //Functions - @Netto
 void calc_residue_flow(ctBranch* root_branch, double alpha_d, double rate_Q, Data* data);

@@ -9,9 +9,7 @@
 
 static inline float clamp(float x, float a, float b)
 {
-
     return x < a ? a : (x > b ? b : x);
-
 }
 
 size_t count_branches(ctBranch* b)
@@ -532,18 +530,64 @@ size_t save_vertex_branch_volume(ctBranch** branch_map, std::string filename, si
 
     size_t num_elements = w * h * slices;
 
-    unsigned int* branch_vol = (unsigned int*) calloc(num_elements, sizeof(unsigned int));
+    float* branch_vol = (float*) calloc(num_elements, sizeof(float));
 
     for(size_t i = 0; i < num_elements; i++) {
         FeatureSet* branch_data = (FeatureSet*) branch_map[i]->data;
-        branch_vol[i] = branch_data->label;
+        branch_vol[i] = (float) branch_data->label;
+//        std::cout << branch_data->label << " ";
     }
+//                     std::cout << std::endl;
+
+    for(size_t i = 0; i < num_elements; i++)
+        if(branch_vol[i] != 0)
+            std::cout << branch_vol[i] << " ";
+    std::cout << std::endl;
 
     size_t bytes_written = ggraf::ResourceManager::getInstance()->saveVertexToBranchMap(filename, w, h, slices, branch_vol);
 
-    memset(branch_vol, 0, sizeof(unsigned int));
+    memset(branch_vol, 0, sizeof(float));
     free(branch_vol);
     branch_vol = nullptr;
 
     return bytes_written;
+}
+
+void save_transfer_functions(ctBranch* root_branch, std::string filename, int num_tfs)
+{
+    if(root_branch == NULL || filename.empty() || num_tfs <= 0) return;
+
+    unsigned char* tf_arr = (unsigned char*) calloc(num_tfs * 256, sizeof(unsigned char));
+
+    std::queue<ctBranch*> branch_queue;
+    branch_queue.push(root_branch);
+
+    do {
+        ctBranch* curr_branch = branch_queue.front();
+        branch_queue.pop();
+
+        FeatureSet* branch_data = (FeatureSet*) curr_branch->data;
+
+        unsigned char tmp_tf[256];
+        memset(tmp_tf, 0, 256 * sizeof(unsigned char));
+        for(int i = 0; i < 256; i++)
+            tmp_tf[i] = static_cast<unsigned char>(branch_data->alpha[i] * 255);
+
+        unsigned char* tf_begin = tf_arr + branch_data->label * 256;
+        memcpy(tf_begin, tmp_tf, 256 * sizeof(unsigned char));
+        memset(tmp_tf, 0, 256 * sizeof(unsigned char));
+
+        for(ctBranch* c = curr_branch->children.head; c != NULL; c = c->nextChild) {
+            FeatureSet* c_data = (FeatureSet*) c->data;
+            if(!c_data->remove)
+                branch_queue.push(c);
+        }
+
+    } while(!branch_queue.empty());
+
+    ggraf::ResourceManager::getInstance()->saveMultiDimensionalTransferFunction(filename, 256, num_tfs, sizeof(unsigned char), tf_arr);
+    memset(tf_arr, 0, num_tfs * 256 * sizeof(unsigned char));
+    free(tf_arr);
+    tf_arr = NULL;
+
 }
