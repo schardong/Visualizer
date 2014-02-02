@@ -76,7 +76,7 @@ namespace ggraf
         return loadRawFile(filename, num_voxels, bytes_per_pixel);
     }
 
-    float* ResourceManager::loadVertexToBranchMap(std::string filename, size_t w, size_t h, size_t slices)
+    unsigned short* ResourceManager::loadVertexToBranchMap(std::string filename, size_t w, size_t h, size_t slices)
     {
         size_t num_voxels = w * h * slices;
 
@@ -86,10 +86,10 @@ namespace ggraf
                                    std::to_string(h) + ", " +
                                    std::to_string(slices) + ")");
 
-        return (float*) loadRawFile(filename, num_voxels, sizeof(float));
+        return (unsigned short*) loadRawFile(filename, num_voxels, sizeof(unsigned short));
     }
 
-    size_t ResourceManager::saveVertexToBranchMap(std::string filename, size_t w, size_t h, size_t slices, float* branch_map)
+    size_t ResourceManager::saveVertexToBranchMap(std::string filename, size_t w, size_t h, size_t slices, unsigned short* branch_map)
     {
         size_t num_voxels = w * h * slices;
 
@@ -99,10 +99,10 @@ namespace ggraf
                                    std::to_string(h) + ", " +
                                    std::to_string(slices) + ")");
 
-        return saveRawFile(filename, num_voxels, sizeof(float), branch_map);
+        return saveRawFile(filename, num_voxels, sizeof(unsigned short), branch_map);
     }
 
-    unsigned char* ResourceManager::loadTransferFuncion(std::string filename, size_t bytes_per_pixel)
+    unsigned char* ResourceManager::loadTransferFunction(std::string filename, size_t bytes_per_pixel)
     {
         size_t num_rgba = bytes_per_pixel == sizeof(unsigned short) ? 4096 * 4 :
                                                                       256 * 4;
@@ -191,14 +191,12 @@ namespace ggraf
             glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_UNSIGNED_SHORT, data);
         else if(bytes_per_pixel == sizeof(GLubyte))
             glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_UNSIGNED_BYTE, data);
-        else if(bytes_per_pixel == sizeof(GLuint))
-            glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_UNSIGNED_INT, data);
 
         glBindTexture(GL_TEXTURE_3D, 0);
         return tex;
     }
 
-    GLuint ResourceManager::createVertexBranchTex(size_t w, size_t h, size_t slices, float* data)
+    GLuint ResourceManager::createVertexBranchTex(size_t w, size_t h, size_t slices, unsigned short* data)
     {
         Logger::getInstance()->log("ggraf::ResourceManager::createVertexBranchTex(" +
                                    std::to_string(w) + ", " +
@@ -216,7 +214,7 @@ namespace ggraf
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_FLOAT, data);
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_UNSIGNED_SHORT, data);
 
         glBindTexture(GL_TEXTURE_3D, 0);
         return tex;
@@ -300,15 +298,13 @@ namespace ggraf
             glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_UNSIGNED_SHORT, data);
         else if(bytes_per_pixel == sizeof(GLubyte))
             glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_UNSIGNED_BYTE, data);
-        else if (bytes_per_pixel == sizeof(GLuint))
-            glTexImage3D(GL_TEXTURE_3D, 0, GL_R32UI, w, h, slices, 0, GL_RED, GL_UNSIGNED_INT, data);
 
         glBindTexture(GL_TEXTURE_3D, 0);
 
         return true;
     }
 
-    bool ResourceManager::uploadVertexBranchData(size_t w, size_t h, size_t slices, float* data, GLuint texId)
+    bool ResourceManager::uploadVertexBranchData(size_t w, size_t h, size_t slices, unsigned short* data, GLuint texId)
     {
         Logger::getInstance()->log("ggraf::ResourceManager::uploadVertexBranchData(" +
                                    std::to_string(w) + ", " +
@@ -321,7 +317,7 @@ namespace ggraf
 
         glBindTexture(GL_TEXTURE_3D, texId);
 
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_FLOAT, data);
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, w, h, slices, 0, GL_RED, GL_UNSIGNED_SHORT, data);
 
         glBindTexture(GL_TEXTURE_3D, 0);
 
@@ -390,6 +386,119 @@ namespace ggraf
 
     }
 
+    void* ResourceManager::getVolumeData(size_t w, size_t h, size_t slices, size_t bytes_per_pixel, GLuint texId)
+    {
+        Logger::getInstance()->log("ggraf::ResourceManager::getVolumeData(" +
+                                   std::to_string(w) + ", " +
+                                   std::to_string(h) + ", " +
+                                   std::to_string(slices) + ", " +
+                                   std::to_string(bytes_per_pixel) + ", " +
+                                   std::to_string(texId) + ")");
+
+        void* data = calloc(w * h * slices, bytes_per_pixel);
+
+        if(texId == 0)
+            return NULL;
+
+        glBindTexture(GL_TEXTURE_3D, texId);
+
+        if(bytes_per_pixel == sizeof(GLushort))
+            glGetTexImage(GL_TEXTURE_3D, 0, GL_RED, GL_UNSIGNED_SHORT, data);
+        else if(bytes_per_pixel == sizeof(GLubyte))
+            glGetTexImage(GL_TEXTURE_3D, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+
+        glBindTexture(GL_TEXTURE_3D, 0);
+
+        return data;
+    }
+
+    unsigned short* ResourceManager::getVertexBranchData(size_t w, size_t h, size_t slices, GLuint texId)
+    {
+        Logger::getInstance()->log("ggraf::ResourceManager::getVertexBranchData(" +
+                                   std::to_string(w) + ", " +
+                                   std::to_string(h) + ", " +
+                                   std::to_string(slices) + ", " +
+                                   std::to_string(texId) + ")");
+
+        unsigned short* data = (unsigned short*) calloc(w * h * slices, sizeof(unsigned short));
+
+        if(texId == 0)
+            return NULL;
+
+        glBindTexture(GL_TEXTURE_3D, texId);
+
+        glGetTexImage(GL_TEXTURE_3D, 0, GL_RED, GL_UNSIGNED_SHORT, data);
+
+        glBindTexture(GL_TEXTURE_3D, 0);
+
+        return data;
+    }
+
+    unsigned char* ResourceManager::getTransferFuncData(size_t bytes_per_pixel, GLuint texId)
+    {
+
+        Logger::getInstance()->log("ggraf::ResourceManager::getTransferFuncData(" +
+                                   std::to_string(bytes_per_pixel) + ", " +
+                                   std::to_string(texId) + ")");
+
+        if(texId == 0)
+            return NULL;
+
+        size_t sz = bytes_per_pixel == sizeof(GLushort) ? 4096 * 4 : 256 * 4;
+        unsigned char* data = (unsigned char*) calloc(sz, bytes_per_pixel);
+
+        glBindTexture(GL_TEXTURE_1D, texId);
+
+        glGetTexImage(GL_TEXTURE_1D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+        glBindTexture(GL_TEXTURE_1D, 0);
+
+        return data;
+    }
+
+    unsigned char* ResourceManager::getMultiDimTransferFuncData(size_t w, size_t h, size_t bytes_per_pixel, GLuint texId)
+    {
+        Logger::getInstance()->log("ggraf::ResourceManager::getMultiDimTransferFuncData(" +
+                                   std::to_string(w) + ", " +
+                                   std::to_string(h) + ", " +
+                                   std::to_string(bytes_per_pixel) + ", " +
+                                   std::to_string(texId) + ")");
+
+        if(texId == 0)
+            return NULL;
+
+        unsigned char* data = (unsigned char*) calloc(w * h, bytes_per_pixel);
+
+        glBindTexture(GL_TEXTURE_2D, texId);
+
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        return data;
+    }
+
+    unsigned char*ResourceManager::getColorTransferFuncData(size_t bytes_per_pixel, GLuint texId)
+    {
+        Logger::getInstance()->log("ggraf::ResourceManager::getColorTransferFuncData(" +
+                                   std::to_string(bytes_per_pixel) + ", " +
+                                   std::to_string(texId) + ")");
+
+        if(texId == 0)
+            return NULL;
+
+        size_t sz = bytes_per_pixel == sizeof(GLushort) ? 4096 * 3 : 256 * 3;
+        unsigned char* data = (unsigned char*) calloc(sz, bytes_per_pixel);
+
+        glBindTexture(GL_TEXTURE_1D, texId);
+
+        glGetTexImage(GL_TEXTURE_1D, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+        glBindTexture(GL_TEXTURE_1D, 0);
+
+        return data;
+    }
+
     GLuint ResourceManager::createCubeVAO()
     {
         GLfloat cube_vertex[24] = {
@@ -442,6 +551,13 @@ namespace ggraf
         glBindVertexArray(0);
 
         return vao;
+    }
+
+    void ResourceManager::renderCubeVAO(GLuint cube_id)
+    {
+        glBindVertexArray(cube_id);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, NULL);
+        glBindVertexArray(0);
     }
 
     void ResourceManager::destroyCubeVao(GLuint cube_id)

@@ -524,27 +524,27 @@ void calc_saddle_min_max(ctBranch* root_branch, Data* data)
     } while(!branch_queue.empty());
 }
 
-size_t save_vertex_branch_volume(ctBranch** branch_map, std::string filename, size_t w, size_t h, size_t slices)
+size_t save_vertex_branch_volume(ctBranch** branch_map, std::string filename, size_t w, size_t h, size_t slices, int max_label)
 {
     if(branch_map == NULL || filename.empty()) return 0;
 
     size_t num_elements = w * h * slices;
 
-    float* branch_vol = (float*) calloc(num_elements, sizeof(float));
+    unsigned short* branch_vol = (unsigned short*) calloc(num_elements, sizeof(unsigned short));
 
     for(size_t i = 0; i < num_elements; i++) {
         FeatureSet* branch_data = (FeatureSet*) branch_map[i]->data;
-        branch_vol[i] = (float) branch_data->label;
+        branch_vol[i] = static_cast<unsigned short>(branch_data->label);
     }
 
-    for(size_t i = 0; i < num_elements; i++)
-        if(branch_vol[i] != 0)
-            std::cout << branch_vol[i] << " ";
-    std::cout << std::endl;
+//    for(size_t i = 0; i < num_elements; i++)
+//        if(branch_vol[i] != 0)
+//            std::cout << branch_vol[i] << " ";
+//    std::cout << std::endl;
 
     size_t bytes_written = ggraf::ResourceManager::getInstance()->saveVertexToBranchMap(filename, w, h, slices, branch_vol);
 
-    memset(branch_vol, 0, sizeof(float));
+    memset(branch_vol, 0, sizeof(unsigned short));
     free(branch_vol);
     branch_vol = nullptr;
 

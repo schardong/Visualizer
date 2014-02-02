@@ -89,7 +89,11 @@ namespace Ui
     void Viewport::initializeGL()
     {
         makeCurrent();
-        ggraf::Kernel::getInstance()->init(format().majorVersion(), format().minorVersion());
+        bool init_success = ggraf::Kernel::getInstance()->init(format().majorVersion(), format().minorVersion());
+        if(!init_success) {
+            Logger::getInstance()->error("OpenGL Context creation failed. Exiting now");
+            exit(1);
+        }
 
         glEnable(GL_TEXTURE_1D);
         glEnable(GL_TEXTURE_2D);

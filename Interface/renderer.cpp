@@ -8,8 +8,6 @@
 #include <sstream>
 #include <QFileDialog>
 
-#include "multidimvolumedata.h"
-
 using std::cout;
 using std::cerr;
 using std::endl;

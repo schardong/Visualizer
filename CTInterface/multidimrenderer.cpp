@@ -112,9 +112,9 @@ void MultiDimRenderer::init()
     sPass->bindFragDataLoc("out_vColor", 0);
     ggraf::Shader::unbind();
 
-    vd = new ggraf::MultiDimVolumeData("/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8",
-                                       "/home/guilherme/Pictures/datasets/vertex-branch-maps/hydrogenAtom.128x128x128.float",
-                                       "/home/guilherme/Pictures/datasets/transfer-functions/hydrogenAtom.14.uint8",
+    vd = new ggraf::MultiDimVolumeData("/home/guilherme/Pictures/datasets/foot.256x256x256.uint8",
+                                       "/home/guilherme/Pictures/datasets/vertex-branch-maps/foot.256x256x256.uint16",
+                                       "/home/guilherme/Pictures/datasets/transfer-functions/foot.439.uint8",
                                        "/home/guilherme/Pictures/datasets/transfer-functions/color_tf3.uint8");
 }
 

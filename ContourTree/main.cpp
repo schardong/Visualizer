@@ -69,8 +69,9 @@ int main(int argc, char** argv)
 {
 //    std::string path = "/home/guilherme/Pictures/datasets/marschnerlobb.41x41x41.uint8";
 //    std::string path = "/home/guilherme/Pictures/datasets/nucleon.41x41x41.uint8";
-//    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
-    //std::string path = "/home/guilherme/Pictures/datasets/foot.256x256x256.uint8";
+    std::string path = "/home/guilherme/Pictures/datasets/hydrogenAtom.128x128x128.uint8";
+//    std::string path = "/home/guilherme/Pictures/datasets/neghip.64x64x64.uint8";
+//    std::string path = "/home/guilherme/Pictures/datasets/foot.256x256x256.uint8";
     //std::string path = "/home/guilherme/Pictures/datasets/stent.512x512x174.uint8";
 
     //    std::string path = "/home/netto/datasets/hydrogenAtom.128x128x128.uint8";
@@ -131,8 +132,8 @@ int main(int argc, char** argv)
                             last_label);
 
     save_vertex_branch_volume(branch_map,
-                              "/home/guilherme/Pictures/datasets/vertex-branch-maps/hydrogenAtom.128x128x128.float",
-                              data.size[0], data.size[1], data.size[2]);
+                              "/home/guilherme/Pictures/datasets/vertex-branch-maps/hydrogenAtom.128x128x128.uint16",
+                              data.size[0], data.size[1], data.size[2], last_label);
 
 //    std::set<ctBranch*> test_set;
 //    for(int i = 0; i < data.totalSize; i++)

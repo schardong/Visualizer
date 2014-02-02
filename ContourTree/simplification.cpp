@@ -43,53 +43,21 @@ void mark_for_removal(ctBranch* root_branch, ctBranch** branch_map, size_t data_
     for(ctBranch* c = root_branch->children.head; c != NULL; c = c->nextChild)
         mark_for_removal(c, branch_map, data_size, importance_measure, threshold);
 
-    if(branch_is_leaf(root_branch)) {
+    if(branch_is_leaf(root_branch))
         importance_measure(root_branch) > threshold ? branch_data->remove = false : branch_data->remove = true;
-        //TODO: Associate the vertices with the parent branch
-        for(size_t i = 0; i < data_size; i++) {
-//            if(branch_map[i] == root_branch && root_branch->parent != NULL) {
-//                branch_map[i] = root_branch->parent;
-//            }
-        }
-    }
 }
-
-//UNUSED
-//void remove_marked_branches(ctBranch* root_branch, ctBranch** branch_map, Data* data, ctContext* ctx)
-//{
-//    if(root_branch == NULL) return;
-//    FeatureSet* branch_data = (FeatureSet*) root_branch->data;
-
-//    if(branch_data == NULL) return;
-//    for(ctBranch* c = root_branch->children.head; c != NULL; c = c->nextChild) {
-//        remove_marked_branches(c, branch_map, data, ctx);
-//        remove_branch(c, branch_map, data, ctx);
-//    }
-
-//    //if(branch_is_leaf(root_branch))
-
-//}
 
 void simplify_tree_dfs(ctBranch* root_branch, ctBranch** branch_map, size_t data_size, double (*importance_measure)(ctBranch*), double threshold)
 {
     mark_for_removal(root_branch, branch_map, data_size, importance_measure, threshold);
-    //    remove_marked_branches(root_branch, branch_map, data, ctx);
-    //    if(root_branch == NULL) return;
-    //    FeatureSet* branch_data = (FeatureSet*) root_branch->data;
 
-    //    for(ctBranch* c = root_branch->children.head; c != NULL; c = c->nextChild)
-    //        simplify_tree_dfs(c, branch_map, data, ctx, importance_measure, threshold);
-
-    //    if(/*root_branch->children.head == NULL*/branch_is_leaf(root_branch)) {
-    //        double arc_importance = importance_measure(root_branch);
-    //        if(arc_importance < threshold) {
-    //            branch_data->remove = true;
-    //            //remove_branch(root_branch, branch_map, data, ctx);
-    //        } else {
-    //            std::cout << "Volume: " << branch_data->v << "\tHypervolume: " << branch_data->hv << "\tPersistance: " << branch_data->p << std::endl;
-    //        }
-    //        return;
-    //    }
+    for(int i = 0; i < data_size; i++) {
+        FeatureSet* branch_data = (FeatureSet*) branch_map[i]->data;
+        while(branch_data->remove == true && branch_map[i]->parent != NULL) {
+            branch_map[i] = branch_map[i]->parent;
+            FeatureSet* branch_data = (FeatureSet*) branch_map[i]->data;
+        }
+    }
 }
 
 //void simplify_tree_bfs(ctBranch* root_branch, double (*importance_measure)(ctBranch*), double threshold)

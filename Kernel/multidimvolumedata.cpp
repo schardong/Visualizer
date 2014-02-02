@@ -76,6 +76,15 @@ namespace ggraf
 
         m_dataTypes[2] = tfp->bytes_per_pixel;
 
+        //        unsigned char* test = ggraf::ResourceManager::getInstance()->getMultiDimTransferFuncData(tfp->w, tfp->h, tfp->bytes_per_pixel, m_aTexIds[2]);
+        //        for(int i = 0; i < tfp->w * tfp->h; i++) {
+        //            if(tf[i] != test[i])
+        //                std::cout << "i = " << i << "\ttf[i] = " << tf[i] << "\ttest[i] = " << test[i] << std::endl;
+        //            std::cout << (int)test[i] << " ";
+        //        }
+        //        free(test);
+        //        test = NULL;
+
         free(tf);
         tf = NULL;
     }
@@ -102,6 +111,16 @@ namespace ggraf
 
         m_dataTypes[3] = tfp->bytes_per_pixel;
 
+        //        unsigned char* test = ggraf::ResourceManager::getInstance()->getColorTransferFuncData(tfp->bytes_per_pixel, m_aTexIds[3]);
+
+        //        for(int i = 0; i < 256*3; i++) {
+        //            if(tf[i] != test[i])
+        //                std::cout << "i = " << i << "\ttf[i] = " << (int)tf[i] << "\ttest[i] = " << (int)test[i] << std::endl;
+        //            std::cout << (int)test[i] << " ";
+        //        }
+        //        free(test);
+        //        test = NULL;
+
         free(tf);
         tf = NULL;
     }
@@ -117,7 +136,7 @@ namespace ggraf
 
         ParsedVolPath* v = parseVolumePath(path);
 
-        float* voxels = ggraf::ResourceManager::getInstance()->loadVertexToBranchMap(v->path, v->dim[0], v->dim[1], v->dim[2]);
+        unsigned short* voxels = ggraf::ResourceManager::getInstance()->loadVertexToBranchMap(v->path, v->dim[0], v->dim[1], v->dim[2]);
 
         if(m_aTexIds[1] != 0) {
             if(ggraf::ResourceManager::getInstance()->uploadVertexBranchData(v->dim[0], v->dim[1], v->dim[2], voxels, m_aTexIds[1]) == false) {
@@ -126,6 +145,13 @@ namespace ggraf
             }
         } else
             m_aTexIds[1] = ggraf::ResourceManager::getInstance()->createVertexBranchTex(v->dim[0], v->dim[1], v->dim[2], voxels);
+
+//        unsigned short* test = ggraf::ResourceManager::getInstance()->getVertexBranchData(v->dim[0], v->dim[1], v->dim[2], m_aTexIds[1]);
+//        for(int i = 0; i < v->dim[0] * v->dim[1] * v->dim[2]; i++) {
+//            std::cout << "i = " << i << "\tvoxels[i] = " << voxels[i] << "\ttest[i] = " << test[i] << std::endl;
+//        }
+//        free(test);
+//        test = NULL;
 
         m_dataTypes[1] = v->bytes_per_pixel;
         m_vDimensions = glm::vec3(v->dim[0], v->dim[1], v->dim[2]);

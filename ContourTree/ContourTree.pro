@@ -23,7 +23,7 @@ QMAKE_CXXFLAGS += -std=c++11 -DUSE_ZLIB -MMD
 
 INCLUDEPATH += ../include
 
-LIBS += -L$$OUT_PWD/../Kernel -lKernel
+LIBS += -L$$OUT_PWD/../Kernel -lggraf
 LIBS += -ldl
 LIBS += -lGL
 LIBS += -lz

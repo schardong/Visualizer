@@ -10,7 +10,7 @@ QT       -= core gui
 
 QMAKE_CXXFLAGS += -std=c++11 -MMD
 
-TARGET = Kernel
+TARGET = ggraf
 TEMPLATE = lib
 CONFIG += staticlib
 

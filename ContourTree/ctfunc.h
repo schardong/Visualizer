@@ -32,7 +32,7 @@ int label_branches(ctBranch*);
  * @param root_branch - The root of the branch decomposition.
  */
 void zero_branches(ctBranch*);
-size_t save_vertex_branch_volume(ctBranch**, std::string, size_t, size_t, size_t);
+size_t save_vertex_branch_volume(ctBranch**, std::string, size_t, size_t, size_t, int);
 void save_transfer_functions(ctBranch*, std::string, int);
 
 //Functions - @Netto

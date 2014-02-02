@@ -15,7 +15,6 @@ in vec3 ex_vEntryPoint;
 in vec4 ex_vExitPoint;
 
 layout(location = 0) out vec4 out_vColor;
-layout(location = 1) out vec4 out_vColor_test;
 
 struct Ray
 {
@@ -38,18 +37,19 @@ vec4 composite(Ray ray, vec3 step)
         vec4 color_sample;
         color_sample.a = texture(u_sOpacityTransferFunction, vec2(branch, scalar_val)).r;
         color_sample.rgb = texture(u_sColorTransferFunction, scalar_val).rgb;
+//        color_sample.rgb = vec3(scalar_val);
 
         color_sample = abs(color_sample);
         color_sample.a = clamp(color_sample.a, 0.f, 1.f);
 
         color_sample.rgb *= color_sample.a;
 
+        color_sample.rgb = vec3(color_sample.a);
+
         colorAcc = (1.f - colorAcc.a) * color_sample + colorAcc;
 
         if(colorAcc.a >= 0.95)
             break;
-
-//        colorAcc.rgb = vec3(branch, branch, branch);
     }
 
     return colorAcc;
@@ -65,6 +65,8 @@ void main(void)
 
     Ray ray = Ray(ex_vEntryPoint, normalize(exitPoint - ex_vEntryPoint));
     vec3 step = ray.direction * sqrt(3.f) / u_fNumSamples;
-    out_vColor = composite(ray, step);//ray.origin;
-    out_vColor_test = composite(ray, step);
+    out_vColor = composite(ray, step);
+//    out_vColor = vec4(exitPoint, 1.0);
+//    out_vColor = vec4(ex_vEntryPoint, 1.0);
+//    out_vColor = vec4(ray.direction, 1.0);
 }

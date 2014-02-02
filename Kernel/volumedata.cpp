@@ -53,9 +53,7 @@ namespace ggraf
 
     void VolumeData::render()
     {
-        glBindVertexArray(m_iVaoId);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, NULL);
-        glBindVertexArray(0);
+        ResourceManager::getInstance()->renderCubeVAO(m_iVaoId);
     }
 
     void VolumeData::loadVolume(std::string path)
@@ -101,7 +99,7 @@ namespace ggraf
 
         ParsedTFPath* tfp = parseTFPath(path);
 
-        unsigned char* tf = ggraf::ResourceManager::getInstance()->loadTransferFuncion(tfp->path, tfp->bytes_per_pixel);
+        unsigned char* tf = ggraf::ResourceManager::getInstance()->loadTransferFunction(tfp->path, tfp->bytes_per_pixel);
 
         if(m_aTexIds[1] != 0) {
             if(ggraf::ResourceManager::getInstance()->uploadTransferFuncData(tfp->bytes_per_pixel, tf, m_aTexIds[1]) == false) {

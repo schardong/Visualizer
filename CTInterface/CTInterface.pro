@@ -26,7 +26,7 @@ OTHER_FILES += \
 
 INCLUDEPATH += ../include
 
-LIBS += -L$$OUT_PWD/../Kernel -lKernel
+LIBS += -L$$OUT_PWD/../Kernel -lggraf
 LIBS += -ldl
 
 config.path = $$OUT_PWD/
