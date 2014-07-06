@@ -2,7 +2,7 @@
 #include "viewport.h"
 #include "scene.h"
 #include "renderer.h"
-#include "contourtree.h"
+//#include "contourtree.h"
 
 #include <QTimer>
 #include <QKeyEvent>
