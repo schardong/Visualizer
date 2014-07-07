@@ -36,6 +36,7 @@ INSTALLS += config
 
 CONFIG(release, debug|release) {
     QMAKE_CXXFLAGS += -g0 -O2
+    LIBS += -L$$OUT_PWD/../../Kernel/Release -lKernel
     message(Release)
     message($$QMAKE_CXXFLAGS)
     message($$LIBS)
@@ -43,6 +44,7 @@ CONFIG(release, debug|release) {
 
 CONFIG(debug, debug|release) {
     QMAKE_CXXFLAGS += -g3 -pg -O0
+    LIBS += -L$$OUT_PWD/../../Kernel/Debug -lKernel
     message(Debug)
     message($$QMAKE_CXXFLAGS)
     message($$LIBS)

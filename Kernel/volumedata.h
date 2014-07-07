@@ -1,7 +1,6 @@
 #ifndef VOLUMEDATA_H
 #define VOLUMEDATA_H
 
-#include "transferfunction.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <string>

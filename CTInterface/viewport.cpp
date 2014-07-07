@@ -2,7 +2,6 @@
 #include "viewport.h"
 #include "scene.h"
 #include "multidimrenderer.h"
-#include "contourtree.h"
 
 #include <QTimer>
 #include <QKeyEvent>
